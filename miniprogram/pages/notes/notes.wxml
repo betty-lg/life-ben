@@ -1,0 +1,23 @@
+<view class="cats">
+  <view
+    class="pill {{category === item ? 'on' : ''}}"
+    wx:for="{{categories}}"
+    wx:key="*this"
+    data-cat="{{item}}"
+    bindtap="onSelectCategory"
+  >{{item}}</view>
+</view>
+
+<view class="list" wx:if="{{notes.length}}">
+  <view class="note-item" wx:for="{{notes}}" wx:key="id" data-id="{{item.id}}" bindtap="onOpenNote">
+    <image wx:if="{{item.thumb}}" class="thumb img" src="{{item.thumb}}" mode="aspectFill" />
+    <view class="thumb" wx:else></view>
+    <view class="note-main">
+      <view class="t">{{item.title}}</view>
+      <view class="d">{{item.preview}}…</view>
+    </view>
+  </view>
+</view>
+<view class="empty" wx:else>这个分类还没有笔记\n点右上角「新建」写一份做法</view>
+
+<view class="fab" bindtap="onCreate">新建</view>

@@ -1,0 +1,60 @@
+<view class="form">
+  <view class="field">
+    <view class="label">名称</view>
+    <input placeholder="例如：五红汤" value="{{title}}" bindinput="onTitle" maxlength="40" />
+  </view>
+
+  <view class="field">
+    <view class="label">分类</view>
+    <picker mode="selector" range="{{categories}}" value="{{catIndex}}" bindchange="onCategory">
+      <view class="picker">{{category}}</view>
+    </picker>
+  </view>
+
+  <view class="field">
+    <view class="label">图片</view>
+    <view class="img-box" wx:if="{{imagePath}}">
+      <image class="preview" src="{{imagePath}}" mode="aspectFill" />
+      <view class="img-actions">
+        <button class="mini-btn" size="mini" bindtap="onChooseImage">更换</button>
+        <button class="mini-btn ghost" size="mini" bindtap="onRemoveImage">移除</button>
+      </view>
+    </view>
+    <button class="upload" wx:else bindtap="onChooseImage">上传图片</button>
+  </view>
+
+  <view class="field">
+    <view class="label">材料</view>
+    <textarea
+      placeholder="列出所需材料与用量…"
+      value="{{materials}}"
+      bindinput="onMaterials"
+      maxlength="2000"
+      auto-height
+    />
+  </view>
+
+  <view class="field">
+    <view class="label">步骤</view>
+    <textarea
+      placeholder="按顺序写制作步骤…"
+      value="{{steps}}"
+      bindinput="onSteps"
+      maxlength="5000"
+      auto-height
+    />
+  </view>
+
+  <view class="field">
+    <view class="label">注意事项</view>
+    <textarea
+      placeholder="禁忌、频次、小贴士…"
+      value="{{tips}}"
+      bindinput="onTips"
+      maxlength="2000"
+      auto-height
+    />
+  </view>
+
+  <button class="save" bindtap="onSave">保存</button>
+</view>

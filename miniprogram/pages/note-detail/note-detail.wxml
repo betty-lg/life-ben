@@ -1,0 +1,42 @@
+<view class="page" wx:if="{{note}}">
+  <view class="title-row">
+    <text class="h2">{{note.title}}</text>
+    <view class="icon-checkin" bindtap="onCheckinIcon" aria-role="button">✓</view>
+  </view>
+  <view class="status-line" wx:if="{{statusLine}}">{{statusLine}}</view>
+
+  <image
+    wx:if="{{note.imagePath}}"
+    class="hero"
+    src="{{note.imagePath}}"
+    mode="aspectFill"
+    bindtap="onPreviewImage"
+  />
+
+  <view class="method-block" wx:if="{{note.materials}}">
+    <view class="method-label">材料</view>
+    <text class="method-body" user-select>{{note.materials}}</text>
+  </view>
+
+  <view class="method-block" wx:if="{{note.steps}}">
+    <view class="method-label">步骤</view>
+    <text class="method-body" user-select>{{note.steps}}</text>
+  </view>
+
+  <view class="method-block" wx:if="{{note.tips}}">
+    <view class="method-label">注意事项</view>
+    <text class="method-body" user-select>{{note.tips}}</text>
+  </view>
+
+  <view class="method-block" wx:if="{{!note.materials && !note.steps && !note.tips && note.body}}">
+    <view class="method-label">制作方法</view>
+    <text class="method-body" user-select>{{note.body}}</text>
+  </view>
+
+  <view class="footer">
+    <button class="btn" size="mini" bindtap="onEdit">编辑</button>
+    <button class="btn ghost" size="mini" bindtap="onDelete">删除</button>
+    <button class="btn primary" size="mini" wx:if="{{!hasActive && !hasEnded}}" bindtap="onStart">开启打卡</button>
+    <button class="btn primary" size="mini" wx:if="{{hasEnded}}" bindtap="onResume">继续打卡</button>
+  </view>
+</view>

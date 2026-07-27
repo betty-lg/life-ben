@@ -1,0 +1,37 @@
+{
+  "pages": [
+    "pages/checkin/checkin",
+    "pages/notes/notes",
+    "pages/note-detail/note-detail",
+    "pages/note-edit/note-edit",
+    "pages/checkin-start/checkin-start"
+  ],
+  "window": {
+    "navigationBarTitleText": "生活本",
+    "navigationBarBackgroundColor": "#f7f6f2",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f6f2"
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#2f6b4f",
+    "backgroundColor": "#faf9f5",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/checkin/checkin",
+        "text": "打卡",
+        "iconPath": "assets/tab/checkin.png",
+        "selectedIconPath": "assets/tab/checkin-active.png"
+      },
+      {
+        "pagePath": "pages/notes/notes",
+        "text": "记录",
+        "iconPath": "assets/tab/notes.png",
+        "selectedIconPath": "assets/tab/notes-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,27 @@
+<view class="form" wx:if="{{note}}">
+  <view class="card">
+    <view class="title">{{note.category}}·{{note.title}}</view>
+    <view class="meta">打卡会挂在这条笔记上</view>
+  </view>
+
+  <view class="field">
+    <view class="label">目标类型</view>
+    <view class="seg">
+      <view class="seg-item {{goalType === 'continuous' ? 'on' : ''}}" data-type="continuous" bindtap="onGoal">连续天数</view>
+      <view class="seg-item {{goalType === 'weekly' ? 'on' : ''}}" data-type="weekly" bindtap="onGoal">一周几次</view>
+    </view>
+  </view>
+
+  <view class="field">
+    <view class="label">{{goalType === 'weekly' ? '每周次数' : '目标天数'}}</view>
+    <input type="number" value="{{targetText}}" bindinput="onTargetInput" bindblur="onTargetBlur" />
+  </view>
+
+  <view class="switch-row">
+    <text>长期坚持（打满自动续期）</text>
+    <switch checked="{{longTerm}}" bindchange="onLongTerm" color="#2f6b4f" />
+  </view>
+  <view class="meta">非长期：打满后会问要不要继续下一周期。</view>
+
+  <button class="save" bindtap="onSave">开始打卡</button>
+</view>

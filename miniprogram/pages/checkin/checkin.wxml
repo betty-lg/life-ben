@@ -1,0 +1,46 @@
+<view class="hint" wx:if="{{localOnlyHint}}">数据保存在本机。进行中可打卡；结束或停掉后在「已结束」，笔记仍在「记录」。</view>
+
+<view class="section-title">进行中 · {{active.length}}</view>
+<block wx:if="{{active.length}}">
+  <view class="card {{item.pending ? 'pending' : ''}}" wx:for="{{active}}" wx:key="id">
+    <view class="row-top">
+      <text class="title">{{item.label}}</text>
+      <text class="badge {{item.todayDone ? '' : (item.pending ? 'hot' : '')}}">
+        {{item.todayDone ? '今日已打' : (item.pending ? '今日待打' : '进行中')}}
+      </text>
+    </view>
+    <view class="meta">
+      <view>{{item.goalType === 'weekly' ? '周频次' : '连续打卡'}}{{item.longTerm ? ' · 长期坚持' : ''}}</view>
+      <view>进度 {{item.progressText}}</view>
+      <view wx:if="{{item.recent}}">最近：{{item.recent}}</view>
+    </view>
+    <view class="progress"><view class="progress-bar" style="width: {{item.pct}}%;"></view></view>
+    <view class="actions">
+      <button class="btn primary" size="mini" data-id="{{item.id}}" bindtap="onComplete" disabled="{{item.todayDone}}">今日打卡</button>
+      <button class="btn" size="mini" data-id="{{item.id}}" bindtap="onMakeup">补卡</button>
+      <button class="btn ghost" size="mini" data-id="{{item.id}}" bindtap="onStop">结束</button>
+    </view>
+  </view>
+</block>
+<view class="empty" wx:else>
+  <view>暂无进行中</view>
+  <view>去「记录」看做法，点标题旁 ✓ 再开启打卡</view>
+</view>
+
+<view class="section-title">已结束 · {{ended.length}}</view>
+<block wx:if="{{ended.length}}">
+  <view class="card" wx:for="{{ended}}" wx:key="id">
+    <view class="row-top">
+      <text class="title">{{item.label}}</text>
+      <text class="badge">已结束</text>
+    </view>
+    <view class="meta">
+      <view>上次：{{item.progressText}}{{item.longTerm ? ' · 曾长期' : ''}}</view>
+      <view wx:if="{{item.recent}}">记录：{{item.recent}}</view>
+    </view>
+    <view class="actions">
+      <button class="btn primary" size="mini" data-id="{{item.id}}" bindtap="onResume">继续打卡</button>
+    </view>
+  </view>
+</block>
+<view class="meta" style="margin: 8rpx 32rpx 40rpx;" wx:else>还没有已结束的打卡</view>
