@@ -1,37 +1,102 @@
 <view class="page" wx:if="{{note}}">
-  <view class="title-row">
-    <text class="h2">{{note.title}}</text>
-    <view class="icon-checkin" bindtap="onCheckinIcon" aria-role="button">✓</view>
-  </view>
-  <view class="status-line" wx:if="{{statusLine}}">{{statusLine}}</view>
+  <!-- 美食 / 美容：标题 + 打卡入口 -->
+  <block wx:if="{{!isLearn}}">
+    <view class="cover">
+      <image
+        wx:if="{{note.imagePath}}"
+        class="cover-img"
+        src="{{note.imagePath}}"
+        mode="aspectFill"
+        bindtap="onPreviewImage"
+      />
+      <view wx:else class="cover-placeholder">{{firstChar}}</view>
+    </view>
+    <view class="title-row">
+      <text class="h2">{{note.title}}</text>
+      <view class="icon-checkin" bindtap="onCheckinIcon">✓</view>
+    </view>
+    <view class="status-line" wx:if="{{statusLine}}">{{statusLine}}</view>
+  </block>
 
-  <image
-    wx:if="{{note.imagePath}}"
-    class="hero"
-    src="{{note.imagePath}}"
-    mode="aspectFill"
-    bindtap="onPreviewImage"
-  />
+  <!-- 美食：图片 + 简介 -->
+  <block wx:if="{{isFood}}">
+    <image
+      wx:if="{{note.imagePath}}"
+      class="hero"
+      src="{{note.imagePath}}"
+      mode="aspectFill"
+      bindtap="onPreviewImage"
+    />
+    <view class="method-block" wx:if="{{note.intro}}">
+      <view class="method-label">简介</view>
+      <text class="method-body" user-select>{{note.intro}}</text>
+    </view>
+  </block>
 
-  <view class="method-block" wx:if="{{note.materials}}">
-    <view class="method-label">材料</view>
-    <text class="method-body" user-select>{{note.materials}}</text>
+  <!-- 美容：无大图强调；可有摘要行 -->
+  <view class="method-block" wx:if="{{isBeauty && note.intro}}">
+    <view class="method-label">摘要</view>
+    <text class="method-body" user-select>{{note.intro}}</text>
   </view>
 
-  <view class="method-block" wx:if="{{note.steps}}">
-    <view class="method-label">步骤</view>
-    <text class="method-body" user-select>{{note.steps}}</text>
+  <!-- 美食 / 美容：材料步骤注意 -->
+  <block wx:if="{{isFood || isBeauty}}">
+    <view class="method-block" wx:if="{{matGroups.length}}">
+      <view class="method-label">材料</view>
+      <view class="mat-section" wx:for="{{matGroups}}" wx:key="index">
+        <view class="mat-section-name" wx:if="{{item.name}}">
+          <text class="mat-section-icon">📦</text>
+          <text class="mat-section-name-text">{{item.name}}</text>
+        </view>
+        <view class="mat-item" wx:for="{{item.items}}" wx:for-item="row" wx:key="index">
+          <text user-select>{{row.mat}}</text>
+          <text class="mat-amount" wx:if="{{row.amount}}" user-select>{{row.amount}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="method-block" wx:if="{{note.steps}}">
+      <view class="method-label">步骤</view>
+      <text class="method-body" user-select>{{note.steps}}</text>
+    </view>
+    <view class="method-block" wx:if="{{note.tips}}">
+      <view class="method-label">注意事项</view>
+      <text class="method-body" user-select>{{note.tips}}</text>
+    </view>
+  </block>
+
+  <!-- 美食：评价占位 -->
+  <view class="method-block" wx:if="{{isFood}}">
+    <view class="method-label">评价</view>
+    <view class="reviews-empty" wx:if="{{!note.reviews.length}}">暂无评价，后续可在这里写下味道与心得</view>
+    <block wx:else>
+      <view class="review" wx:for="{{note.reviews}}" wx:key="index">{{item}}</view>
+    </block>
   </view>
 
-  <view class="method-block" wx:if="{{note.tips}}">
-    <view class="method-label">注意事项</view>
-    <text class="method-body" user-select>{{note.tips}}</text>
-  </view>
-
-  <view class="method-block" wx:if="{{!note.materials && !note.steps && !note.tips && note.body}}">
-    <view class="method-label">制作方法</view>
-    <text class="method-body" user-select>{{note.body}}</text>
-  </view>
+  <!-- 学习：全文 -->
+  <block wx:if="{{isLearn}}">
+    <view class="cover learn-cover">
+      <view class="cover-placeholder">{{firstChar}}</view>
+    </view>
+    <view class="title-row learn-title" wx:if="{{note.title && note.title !== '句子'}}">
+      <text class="h2">{{note.title}}</text>
+      <view class="icon-checkin" bindtap="onCheckinIcon">✓</view>
+    </view>
+    <view class="title-row learn-title" wx:else>
+      <text class="h2 muted">学习笔记</text>
+      <view class="icon-checkin" bindtap="onCheckinIcon">✓</view>
+    </view>
+    <view class="status-line" wx:if="{{statusLine}}">{{statusLine}}</view>
+    <view class="learn-tags" wx:if="{{learnTags.length}}">
+      <view class="learn-tag" wx:for="{{learnTags}}" wx:key="name">
+        <text wx:if="{{item.icon}}" class="learn-tag-icon">{{item.icon}}</text>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+    <view class="learn-body">
+      <text user-select>{{note.body}}</text>
+    </view>
+  </block>
 
   <view class="footer">
     <button class="btn" size="mini" bindtap="onEdit">编辑</button>

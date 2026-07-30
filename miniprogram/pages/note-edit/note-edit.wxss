@@ -2,15 +2,40 @@
   padding: 28rpx 32rpx 80rpx;
 }
 
+.meal-hint {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 24rpx;
+  padding: 16rpx 20rpx;
+  background: #eaf3ee;
+  color: #2a5c42;
+  border-radius: 14rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.meal-hint-emoji {
+  font-size: 26rpx;
+  line-height: 1;
+}
+
 .field {
-  margin-bottom: 28rpx;
+  margin-bottom: 32rpx;
 }
 
 .label {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b6b66;
   margin-bottom: 12rpx;
   font-weight: 600;
+}
+
+.label-hint {
+  font-size: 22rpx;
+  color: #9a9a94;
+  font-weight: 400;
+  margin-left: 8rpx;
 }
 
 input,
@@ -20,13 +45,18 @@ textarea,
   background: #fff;
   border: 1rpx solid #d8d6cf;
   border-radius: 12rpx;
-  padding: 20rpx;
+  padding: 20rpx 24rpx;
   box-sizing: border-box;
-  font-size: 28rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+}
+
+input {
+  height: 88rpx;
 }
 
 textarea {
-  min-height: 160rpx;
+  min-height: 180rpx;
 }
 
 .upload {
@@ -64,6 +94,134 @@ textarea {
 .mini-btn.ghost {
   background: transparent;
   color: #6b6b66;
+}
+
+/* 材料分组 */
+.mat-group {
+  background: #fff;
+  border: 1rpx solid #d8d6cf;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+}
+
+.mat-group-head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 24rpx;
+  background: #f9f8f5;
+  border-bottom: 1rpx solid #eceae4;
+}
+
+.mat-group-head input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0;
+  height: 56rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2a2a28;
+}
+
+.mat-group-del {
+  font-size: 24rpx;
+  color: #c28c6c;
+  padding: 8rpx 12rpx;
+}
+
+.mat-rows {
+  padding: 12rpx 16rpx 8rpx;
+}
+
+.mat-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.mat-input {
+  height: 72rpx;
+  font-size: 28rpx;
+  padding: 0 16rpx;
+  border: 1rpx solid #e6e4de;
+  border-radius: 10rpx;
+  background: #faf9f5;
+}
+
+.mat-input.name {
+  flex: 3;
+}
+
+.mat-input.amount {
+  flex: 2;
+}
+
+.mat-row-del {
+  flex-shrink: 0;
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c28c6c;
+  font-size: 32rpx;
+}
+
+.mat-add-row {
+  padding: 12rpx 0 8rpx;
+  font-size: 24rpx;
+  color: #2f6b4f;
+  text-align: center;
+}
+
+.mat-add-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx;
+  color: #2f6b4f;
+  font-size: 26rpx;
+  font-weight: 500;
+  background: #fff;
+  border: 1rpx dashed #9bc4ad;
+  border-radius: 12rpx;
+}
+
+.tag-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag-chip {
+  padding: 12rpx 22rpx;
+  border-radius: 12rpx;
+  background: #fff;
+  border: 1rpx solid #e6e4de;
+  font-size: 26rpx;
+  color: #6b6b66;
+}
+
+.tag-chip.on {
+  background: #e4f0e9;
+  border-color: #9bc4ad;
+  color: #2f6b4f;
+  font-weight: 600;
+}
+
+.tag-chip.learn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 22rpx;
+}
+
+.tag-icon {
+  font-size: 30rpx;
+  line-height: 1;
 }
 
 .save {

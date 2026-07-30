@@ -1,59 +1,113 @@
 <view class="form">
-  <view class="field">
+  <view class="meal-hint" wx:if="{{mealLabel}}">
+    <text class="meal-hint-emoji">📅</text>
+    <text>将为这一餐记录：{{mealLabel}}</text>
+  </view>
+
+  <view class="field" wx:if="{{!isLearn}}">
     <view class="label">名称</view>
-    <input placeholder="例如：五红汤" value="{{title}}" bindinput="onTitle" maxlength="40" />
+    <input placeholder="例如：五红汤 / 面膜" value="{{title}}" bindinput="onTitle" maxlength="40" />
   </view>
 
-  <view class="field">
-    <view class="label">分类</view>
-    <picker mode="selector" range="{{categories}}" value="{{catIndex}}" bindchange="onCategory">
-      <view class="picker">{{category}}</view>
-    </picker>
+  <view class="field" wx:if="{{isLearn}}">
+    <view class="label">标题（可选）</view>
+    <input placeholder="默认「句子」" value="{{title}}" bindinput="onTitle" maxlength="40" />
   </view>
 
-  <view class="field">
-    <view class="label">图片</view>
-    <view class="img-box" wx:if="{{imagePath}}">
-      <image class="preview" src="{{imagePath}}" mode="aspectFill" />
-      <view class="img-actions">
-        <button class="mini-btn" size="mini" bindtap="onChooseImage">更换</button>
-        <button class="mini-btn ghost" size="mini" bindtap="onRemoveImage">移除</button>
+  <block wx:if="{{isFood}}">
+    <view class="field">
+      <view class="label">图片</view>
+      <view class="img-box" wx:if="{{imagePath}}">
+        <image class="preview" src="{{imagePath}}" mode="aspectFill" />
+        <view class="img-actions">
+          <button class="mini-btn" size="mini" bindtap="onChooseImage">更换</button>
+          <button class="mini-btn ghost" size="mini" bindtap="onRemoveImage">移除</button>
+        </view>
+      </view>
+      <button class="upload" wx:else bindtap="onChooseImage">上传图片</button>
+    </view>
+    <view class="field">
+      <view class="label">简介</view>
+      <textarea placeholder="一句话介绍这道菜…" value="{{intro}}" bindinput="onIntro" maxlength="200" auto-height />
+    </view>
+    <view class="field">
+      <view class="label">标签<text class="label-hint">可多选，用于列表筛选</text></view>
+      <view class="tag-pick">
+        <view
+          class="tag-chip {{item.on ? 'on' : ''}}"
+          wx:for="{{tagOptions}}"
+          wx:key="name"
+          data-name="{{item.name}}"
+          bindtap="onToggleTag"
+        >{{item.name}}</view>
       </view>
     </view>
-    <button class="upload" wx:else bindtap="onChooseImage">上传图片</button>
+  </block>
+
+  <view class="field" wx:if="{{isBeauty}}">
+    <view class="label">摘要（列表展示）</view>
+    <textarea placeholder="一行摘要，出现在美容列表里" value="{{intro}}" bindinput="onIntro" maxlength="120" auto-height />
   </view>
 
-  <view class="field">
-    <view class="label">材料</view>
-    <textarea
-      placeholder="列出所需材料与用量…"
-      value="{{materials}}"
-      bindinput="onMaterials"
-      maxlength="2000"
-      auto-height
-    />
-  </view>
+  <block wx:if="{{isFood || isBeauty}}">
+    <view class="field">
+      <view class="label">材料<text class="label-hint">可分组，如面团/馅料</text></view>
+      <view class="mat-group" wx:for="{{matGroups}}" wx:for-index="gIdx" wx:key="gIdx">
+        <view class="mat-group-head">
+          <input
+            placeholder="分组名（如面团、馅料，可不填）"
+            value="{{item.name}}"
+            data-g="{{gIdx}}"
+            bindinput="onMatGroupName"
+          />
+          <view class="mat-group-del" wx:if="{{matGroups.length > 1}}" data-g="{{gIdx}}" bindtap="onDelMatGroup">删除</view>
+        </view>
+        <view class="mat-rows">
+          <view class="mat-row" wx:for="{{item.rows}}" wx:for-item="row" wx:for-index="rIdx" wx:key="rIdx">
+            <input class="mat-input name" placeholder="材料" value="{{row.name}}" data-g="{{gIdx}}" data-r="{{rIdx}}" bindinput="onMatName" />
+            <input class="mat-input amount" placeholder="用量" value="{{row.amount}}" data-g="{{gIdx}}" data-r="{{rIdx}}" bindinput="onMatAmount" />
+            <view class="mat-row-del" data-g="{{gIdx}}" data-r="{{rIdx}}" bindtap="onDelMatRow">×</view>
+          </view>
+          <view class="mat-add-row" data-g="{{gIdx}}" bindtap="onAddMatRow">+ 添加材料</view>
+        </view>
+      </view>
+      <view class="mat-add-group" bindtap="onAddMatGroup">+ 添加一组</view>
+    </view>
+    <view class="field">
+      <view class="label">步骤</view>
+      <textarea placeholder="按顺序写步骤…" value="{{steps}}" bindinput="onSteps" maxlength="5000" auto-height />
+    </view>
+    <view class="field">
+      <view class="label">注意事项</view>
+      <textarea placeholder="禁忌、频次、小贴士…" value="{{tips}}" bindinput="onTips" maxlength="2000" auto-height />
+    </view>
+  </block>
 
-  <view class="field">
-    <view class="label">步骤</view>
+  <view class="field" wx:if="{{isLearn}}">
+    <view class="label">内容</view>
     <textarea
-      placeholder="按顺序写制作步骤…"
-      value="{{steps}}"
-      bindinput="onSteps"
+      placeholder="把句子或段落记在这里。列表只会显示第一行。"
+      value="{{body}}"
+      bindinput="onBody"
       maxlength="5000"
       auto-height
     />
   </view>
 
-  <view class="field">
-    <view class="label">注意事项</view>
-    <textarea
-      placeholder="禁忌、频次、小贴士…"
-      value="{{tips}}"
-      bindinput="onTips"
-      maxlength="2000"
-      auto-height
-    />
+  <view class="field" wx:if="{{isLearn}}">
+    <view class="label">分类<text class="label-hint">用于列表展示，可单选</text></view>
+    <view class="tag-pick">
+      <view
+        class="tag-chip learn {{item.on ? 'on' : ''}}"
+        wx:for="{{tagOptions}}"
+        wx:key="name"
+        data-name="{{item.name}}"
+        bindtap="onToggleTag"
+      >
+        <text wx:if="{{item.icon}}" class="tag-icon">{{item.icon}}</text>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
   </view>
 
   <button class="save" bindtap="onSave">保存</button>
