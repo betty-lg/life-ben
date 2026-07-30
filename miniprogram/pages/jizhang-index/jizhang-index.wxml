@@ -1,0 +1,91 @@
+<!--pages/jizhang-index/jizhang-index.wxml-->
+<view class="container">
+  <!-- 顶部操作栏：记一笔 + 统计 -->
+  <view class="top-actions">
+    <view class="action-btn primary" bindtap="onGoAdd">+ 记一笔</view>
+    <view class="action-btn ghost" bindtap="onGoStats">统计</view>
+  </view>
+
+  <!-- 三指标：今日 / 本月 / 今年 -->
+  <view class="summary-card">
+    <view class="summary-item">
+      <text class="label">今日</text>
+      <text class="amount">¥{{todayTotal}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">本月</text>
+      <text class="amount">¥{{monthTotal}}</text>
+    </view>
+    <view class="summary-item">
+      <text class="label">今年</text>
+      <text class="amount">¥{{yearTotal}}</text>
+    </view>
+  </view>
+
+  <!-- 对比 + 日均 -->
+  <view class="insight-card">
+    <view class="compare-row">
+      <text class="compare-text {{monthCompare.direction}}">{{monthCompare.diffText}}</text>
+      <text wx:if="{{monthCompare.percentText && monthCompare.percentText !== '新增'}}" class="compare-percent {{monthCompare.direction}}">{{monthCompare.percentText}}</text>
+    </view>
+    <view class="avg-row">
+      <text class="avg-label">本月日均</text>
+      <text class="avg-value">¥{{dailyAverage}}</text>
+    </view>
+  </view>
+
+  <!-- Top3 分类 -->
+  <view class="section-card">
+    <view class="section-title">本月花钱最多</view>
+    <view wx:if="{{topCategories.length === 0}}" class="section-empty">暂无分类数据</view>
+    <view wx:for="{{topCategories}}" wx:key="category" class="top-item">
+      <view class="top-head">
+        <text class="top-rank">{{index + 1}}</text>
+        <text class="top-name">{{item.category}}</text>
+        <text class="top-amount">¥{{item.totalText}}</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width:{{item.percent}}%"></view>
+      </view>
+      <text class="top-percent">{{item.percent}}%</text>
+    </view>
+  </view>
+
+  <!-- 最大单笔 -->
+  <view class="section-card">
+    <view class="section-title">本月最大单笔</view>
+    <view wx:if="{{!maxExpense}}" class="section-empty">暂无记录</view>
+    <view wx:else class="max-row">
+      <text class="max-category">{{maxExpense.category}}</text>
+      <text class="max-meta">{{maxExpense.date}}</text>
+      <text class="max-amount">¥{{maxExpense.amount}}</text>
+    </view>
+  </view>
+
+  <!-- 最近记录 -->
+  <view class="list-header">
+    <text>近期记录</text>
+    <text class="clear-btn" bindtap="clearAll">清空全部</text>
+  </view>
+
+  <view wx:if="{{recentExpenses.length === 0}}" class="empty">
+    <text>还没有记录，去记一笔吧~</text>
+  </view>
+
+  <view wx:for="{{recentExpenses}}" wx:key="timestamp" class="expense-item">
+    <view class="item-left">
+      <view class="category-icon" style="background:{{item.color || '#4CAF50'}}">
+        <text>{{item.categoryInitial}}</text>
+      </view>
+      <view class="item-info">
+        <text class="category">{{item.category}}</text>
+        <text class="date">{{item.date}}</text>
+        <text class="note" wx:if="{{item.note}}">{{item.note}}</text>
+      </view>
+    </view>
+    <view class="item-right">
+      <text class="amount">-¥{{item.amountText}}</text>
+      <text class="delete-btn" bindtap="deleteItem" data-index="{{index}}">✕</text>
+    </view>
+  </view>
+</view>

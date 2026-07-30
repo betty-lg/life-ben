@@ -1,0 +1,98 @@
+/* pages/add/add.wxss */
+.container {
+  padding: 30rpx;
+  background: #f5f5f5;
+  min-height: 100vh;
+}
+
+.form-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06);
+}
+
+.form-item {
+  margin-bottom: 40rpx;
+}
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.amount-input-wrap {
+  display: flex;
+  align-items: center;
+  border-bottom: 2rpx solid #e0e0e0;
+  padding-bottom: 10rpx;
+}
+.amount-input-wrap .currency {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #2E7D32;
+  margin-right: 10rpx;
+}
+.amount-input {
+  flex: 1;
+  font-size: 48rpx;
+  font-weight: bold;
+  padding: 10rpx 0;
+  color: #333;
+}
+
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+.category-tag {
+  padding: 16rpx 32rpx;
+  background: #f0f0f0;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  color: #666;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+.category-tag.active {
+  background: #E8F5E9;
+  color: #2E7D32;
+  border-color: #4CAF50;
+}
+
+.picker-value {
+  padding: 20rpx 0;
+  font-size: 30rpx;
+  color: #333;
+  border-bottom: 2rpx solid #e0e0e0;
+}
+
+.note-input {
+  padding: 20rpx 0;
+  font-size: 30rpx;
+  border-bottom: 2rpx solid #e0e0e0;
+  color: #333;
+}
+
+.save-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #2E7D32, #4CAF50);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  padding: 28rpx 0;
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-top: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(46, 125, 50, 0.3);
+}
+.save-btn:active {
+  opacity: 0.8;
+}

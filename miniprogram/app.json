@@ -4,11 +4,14 @@
     "pages/food/food",
     "pages/beauty/beauty",
     "pages/learn/learn",
+    "pages/jizhang-index/jizhang-index",
     "pages/note-detail/note-detail",
     "pages/note-edit/note-edit",
     "pages/checkin-start/checkin-start",
     "pages/meal-calendar/meal-calendar",
-    "pages/meal-pick/meal-pick"
+    "pages/meal-pick/meal-pick",
+    "pages/jizhang-add/jizhang-add",
+    "pages/jizhang-stats/jizhang-stats"
   ],
   "window": {
     "navigationBarTitleText": "生活本",
@@ -45,6 +48,12 @@
         "text": "学习",
         "iconPath": "assets/tab/learn.png",
         "selectedIconPath": "assets/tab/learn-active.png"
+      },
+      {
+        "pagePath": "pages/jizhang-index/jizhang-index",
+        "text": "记账",
+        "iconPath": "assets/tab/jizhang.png",
+        "selectedIconPath": "assets/tab/jizhang-active.png"
       }
     ]
   },

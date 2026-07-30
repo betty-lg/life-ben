@@ -1,0 +1,87 @@
+<!--pages/stats/stats.wxml-->
+<view class="container">
+  <!-- 总支出 -->
+  <view class="total-card">
+    <text class="total-label">总支出</text>
+    <text class="total-amount">¥{{total}}</text>
+  </view>
+
+  <!-- 近7天趋势 -->
+  <view class="trend-card">
+    <view class="trend-header">
+      <text class="trend-title">近7天趋势</text>
+      <text class="trend-meta" wx:if="{{trendMaxLabel}}">最高 {{trendMaxLabel}}</text>
+    </view>
+    <view class="trend-avg">日均 ¥{{trendAvg}}</view>
+
+    <view class="trend-chart">
+      <view wx:for="{{trendData}}" wx:key="key" class="trend-col">
+        <text class="trend-value {{item.isZero ? 'zero' : ''}} {{item.isMax ? 'max' : ''}}">{{item.isZero ? '0' : item.valueText}}</text>
+        <view class="trend-bar-track">
+          <view
+            class="trend-bar {{item.isZero ? 'zero' : ''}} {{item.isMax ? 'max' : ''}} {{item.isToday ? 'today' : ''}}"
+            style="height:{{item.height}}%"
+          ></view>
+        </view>
+        <text class="trend-label {{item.isToday ? 'today' : ''}}">{{item.label}}</text>
+        <text class="trend-week">{{item.week}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 月度实时对比（对齐日） -->
+  <view class="compare-card">
+    <view class="section-title-inline">月度对比</view>
+    <view class="compare-hint">{{monthCompare.dayHint}}</view>
+
+    <view class="compare-pair">
+      <view class="compare-box">
+        <text class="compare-box-label">{{monthCompare.previousLabel}}</text>
+        <text class="compare-box-amount">¥{{monthCompare.previousText}}</text>
+      </view>
+      <view class="compare-vs">VS</view>
+      <view class="compare-box current">
+        <text class="compare-box-label">{{monthCompare.currentLabel}}</text>
+        <text class="compare-box-amount">¥{{monthCompare.currentText}}</text>
+      </view>
+    </view>
+
+    <view class="compare-result {{monthCompare.direction}}">
+      <text>{{monthCompare.diffText}}</text>
+      <text wx:if="{{monthCompare.percentText}}" class="compare-pct">{{monthCompare.percentText}}</text>
+    </view>
+
+    <view class="monthly-chart" wx:if="{{monthlyData.length > 0}}">
+      <view wx:for="{{monthlyData}}" wx:key="key" class="monthly-col">
+        <text class="monthly-value">{{item.valueText}}</text>
+        <view class="monthly-track">
+          <view class="monthly-bar {{item.isCurrent ? 'current' : ''}}" style="height:{{item.height}}%"></view>
+        </view>
+        <text class="monthly-label {{item.isCurrent ? 'current' : ''}}">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类统计：名称 + 金额，下面是备注细分 -->
+  <view class="section-title">分类统计</view>
+  <view class="section-hint">下方为备注细分：相同合并，不同分开</view>
+
+  <view wx:for="{{stats}}" wx:key="category" class="stat-block">
+    <view class="stat-head" bindtap="showCategoryDetail" data-category="{{item.category}}">
+      <text class="stat-name">{{item.category}}</text>
+      <text class="stat-amount">¥{{item.totalText}}</text>
+    </view>
+    <view class="stat-sub">{{item.count}}笔 · 占比 {{item.percent}}%</view>
+
+    <view wx:if="{{item.notes.length > 0}}" class="note-list">
+      <view wx:for="{{item.notes}}" wx:for-item="note" wx:key="name" class="note-item">
+        <text class="note-name">{{note.name}}</text>
+        <text class="note-amount">¥{{note.totalText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{stats.length === 0}}" class="empty">
+    <text>暂无数据</text>
+  </view>
+</view>

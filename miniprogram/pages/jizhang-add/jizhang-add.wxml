@@ -1,0 +1,42 @@
+<!--pages/add/add.wxml-->
+<view class="container">
+  <view class="form-card">
+    <!-- 金额输入 -->
+    <view class="form-item">
+      <text class="label">金额</text>
+      <view class="amount-input-wrap">
+        <text class="currency">¥</text>
+        <input class="amount-input" type="digit" placeholder="0.00" bindinput="onAmountInput" value="{{amount}}"/>
+      </view>
+    </view>
+
+    <!-- 分类选择 -->
+    <view class="form-item">
+      <text class="label">分类</text>
+      <view class="category-grid">
+        <view wx:for="{{categories}}" wx:key="index" 
+          class="category-tag {{selectedCategory === item ? 'active' : ''}}"
+          bindtap="selectCategory" data-category="{{item}}">
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 日期 -->
+    <view class="form-item">
+      <text class="label">日期</text>
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <view class="picker-value">{{date}}</view>
+      </picker>
+    </view>
+
+    <!-- 备注 -->
+    <view class="form-item">
+      <text class="label">备注</text>
+      <input class="note-input" placeholder="可选，比如：午饭" bindinput="onNoteInput" value="{{note}}"/>
+    </view>
+
+    <!-- 保存按钮 -->
+    <button class="save-btn" bindtap="saveExpense">保存记录</button>
+  </view>
+</view>

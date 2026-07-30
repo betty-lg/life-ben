@@ -15,6 +15,8 @@ function load() {
       version: raw.version || VERSION,
       notes: Array.isArray(raw.notes) ? raw.notes : [],
       checkins: Array.isArray(raw.checkins) ? raw.checkins : [],
+      expenses: Array.isArray(raw.expenses) ? raw.expenses : [],
+      categories: Array.isArray(raw.categories) ? raw.categories : [],
     };
   } catch (e) {
     return emptyDoc();
@@ -26,6 +28,8 @@ function save(doc) {
     version: VERSION,
     notes: doc.notes || [],
     checkins: doc.checkins || [],
+    expenses: doc.expenses || [],
+    categories: doc.categories || [],
   };
   try {
     wx.setStorageSync(STORAGE_KEY, payload);
@@ -196,6 +200,65 @@ function datesWithMealsInMonth(monthKey) {
   return Array.from(set).sort();
 }
 
+/**
+ * Expenses helpers — expenses live inside life_ben_v1 (alongside notes/checkins)
+ * so that the whole app's data is in one doc.
+ */
+function getExpenses() {
+  const doc = load();
+  return Array.isArray(doc.expenses) ? doc.expenses : [];
+}
+
+function setExpenses(list) {
+  const doc = load();
+  doc.expenses = Array.isArray(list) ? list : [];
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, expenses: doc.expenses };
+}
+
+function addExpense(expense) {
+  const list = getExpenses();
+  list.push(expense);
+  return setExpenses(list);
+}
+
+function deleteExpense(predicate) {
+  const list = getExpenses();
+  const filtered = list.filter((e) => !predicate(e));
+  return setExpenses(filtered);
+}
+
+function clearExpenses() {
+  return setExpenses([]);
+}
+
+/**
+ * One-time migration: if old standalone 'expenses' or 'categories' keys exist in storage
+ * but life_ben_v1 doesn't have them yet, fold them in.
+ */
+function migrateLegacyStorage() {
+  try {
+    const legacyExpenses = wx.getStorageSync('expenses');
+    const legacyCategories = wx.getStorageSync('categories');
+    const doc = load();
+    let changed = false;
+    const expensesEmpty = !Array.isArray(doc.expenses) || doc.expenses.length === 0;
+    const categoriesEmpty = !Array.isArray(doc.categories) || doc.categories.length === 0;
+    if (Array.isArray(legacyExpenses) && legacyExpenses.length && expensesEmpty) {
+      doc.expenses = legacyExpenses;
+      changed = true;
+    }
+    if (Array.isArray(legacyCategories) && legacyCategories.length && categoriesEmpty) {
+      doc.categories = legacyCategories;
+      changed = true;
+    }
+    if (changed) save(doc);
+  } catch (e) {
+    // ignore
+  }
+}
+
 function seedIfEmpty() {
   const doc = load();
   if (doc.notes.length > 0) return { seeded: false };
@@ -272,7 +335,8 @@ function seedIfEmpty() {
       body: '我们读过的书，终将内化成眼里的光，骨子里的从容，以及谈吐间的气质。',
     }),
   ];
-  save({ version: VERSION, notes, checkins: [] });
+  // Preserve any existing fields (e.g. migrated expenses / categories)
+  save({ ...doc, version: VERSION, notes });
   return { seeded: true };
 }
 
@@ -292,6 +356,12 @@ module.exports = {
   replaceCheckins,
   findMealsForDate,
   datesWithMealsInMonth,
+  getExpenses,
+  setExpenses,
+  addExpense,
+  deleteExpense,
+  clearExpenses,
+  migrateLegacyStorage,
   seedIfEmpty,
   uid,
 };
