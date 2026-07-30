@@ -1,0 +1,34 @@
+<view class="search-bar">
+  <input
+    class="search-input"
+    placeholder="搜索名称、摘要、步骤…"
+    value="{{keyword}}"
+    confirm-type="search"
+    bindinput="onSearch"
+  />
+  <text class="clear" wx:if="{{keyword}}" bindtap="onClear">清除</text>
+</view>
+
+<view class="list" wx:if="{{notes.length}}">
+  <view class="row" wx:for="{{notes}}" wx:key="id" data-note-id="{{item.id}}" bindtap="onOpen">
+    <view class="cover">
+      <image
+        wx:if="{{item.imagePath}}"
+        class="cover-img"
+        src="{{item.imagePath}}"
+        mode="aspectFill"
+      />
+      <view wx:else class="cover-placeholder">{{item.firstChar}}</view>
+    </view>
+    <view class="row-main">
+      <view class="name">{{item.title}}</view>
+      <view class="summary">{{item.preview || '暂无摘要'}}</view>
+    </view>
+  </view>
+</view>
+<view class="empty" wx:else>
+  <view>{{keyword ? '没有匹配的美容内容' : '还没有美容笔记'}}</view>
+  <view>{{keyword ? '换个关键词试试' : '记录护肤方法、面膜步骤等'}}</view>
+</view>
+
+<view class="fab" bindtap="onCreate">新建</view>

@@ -1,0 +1,65 @@
+<view class="top">
+  <view class="search">
+    <text class="search-icon">⌕</text>
+    <input
+      class="search-input"
+      placeholder="搜索菜名 / 材料"
+      value="{{keyword}}"
+      confirm-type="search"
+      bindinput="onSearchInput"
+      bindconfirm="onSearch"
+    />
+    <text class="clear" wx:if="{{keyword}}" catchtap="onClear">×</text>
+  </view>
+  <view class="search-go {{keyword ? 'on' : ''}}" bindtap="onSearch">搜索</view>
+  <view class="add" bindtap="onCreate">+</view>
+  <view class="cal" bindtap="onOpenCalendar">📅</view>
+</view>
+
+<view class="wrap">
+  <view class="side">
+    <view
+      class="side-item {{activeTag === 'all' ? 'on' : ''}}"
+      data-tag="all"
+      bindtap="onTapTag"
+    >全部</view>
+    <view
+      class="side-item {{activeTag === item ? 'on' : ''}}"
+      wx:for="{{tags}}"
+      wx:key="*this"
+      data-tag="{{item}}"
+      bindtap="onTapTag"
+    >{{item}}</view>
+  </view>
+
+  <view class="main">
+    <block wx:if="{{notes.length}}">
+      <view
+        class="row"
+        wx:for="{{notes}}"
+        wx:key="id"
+        data-note-id="{{item.id}}"
+        bindtap="onOpen"
+      >
+        <view class="cover">
+          <image
+            wx:if="{{item.imagePath}}"
+            class="cover-img"
+            src="{{item.imagePath}}"
+            mode="aspectFill"
+          />
+          <view wx:else class="cover-placeholder">{{item.firstChar}}</view>
+        </view>
+        <view class="row-main">
+          <view class="name">{{item.title}}</view>
+          <view class="summary">{{item.preview || '暂无简介'}}</view>
+          <view class="eaten" wx:if="{{item.eatenLabel}}">{{item.eatenLabel}}</view>
+        </view>
+      </view>
+    </block>
+    <view class="empty" wx:else>
+      <view>{{hasFilter ? '没有匹配内容' : '还没有美食笔记'}}</view>
+      <view>点右上「+」添加</view>
+    </view>
+  </view>
+</view>

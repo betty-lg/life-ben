@@ -1,0 +1,29 @@
+<view class="search-bar">
+  <input
+    class="search-input"
+    placeholder="搜索句子、段落关键词…"
+    value="{{keyword}}"
+    confirm-type="search"
+    bindinput="onSearch"
+  />
+  <text class="clear" wx:if="{{keyword}}" bindtap="onClear">清除</text>
+</view>
+
+<view class="list" wx:if="{{notes.length}}">
+  <view class="quote" wx:for="{{notes}}" wx:key="id" data-note-id="{{item.id}}" bindtap="onOpen">
+    <view class="cover">
+      <text wx:if="{{item.tagIcon}}" class="cover-icon">{{item.tagIcon}}</text>
+      <view wx:else class="cover-placeholder">{{item.firstChar}}</view>
+    </view>
+    <view class="quote-main">
+      <text class="line">{{item.line}}</text>
+      <view class="tag" wx:if="{{item.tag}}">{{item.tag}}</view>
+    </view>
+  </view>
+</view>
+<view class="empty" wx:else>
+  <view>{{keyword ? '没有匹配的学习内容' : '还没有学习记录'}}</view>
+  <view>{{keyword ? '换个关键词试试' : '把喜欢的句子记在这里'}}</view>
+</view>
+
+<view class="fab" bindtap="onCreate">新建</view>

@@ -1,46 +1,73 @@
-<view class="hint" wx:if="{{localOnlyHint}}">数据保存在本机。进行中可打卡；结束或停掉后在「已结束」，笔记仍在「记录」。</view>
+<view class="hint" wx:if="{{localOnlyHint}}">数据保存在本机。进行中可打卡；结束或停掉后在「已结束」。内容在美食 / 美容 / 学习里。</view>
 
-<view class="section-title">进行中 · {{active.length}}</view>
+<view class="section-title">
+  <text class="section-label">进行中</text>
+  <text class="section-count">{{active.length}}</text>
+</view>
 <block wx:if="{{active.length}}">
-  <view class="card {{item.pending ? 'pending' : ''}}" wx:for="{{active}}" wx:key="id">
-    <view class="row-top">
-      <text class="title">{{item.label}}</text>
-      <text class="badge {{item.todayDone ? '' : (item.pending ? 'hot' : '')}}">
-        {{item.todayDone ? '今日已打' : (item.pending ? '今日待打' : '进行中')}}
-      </text>
+  <view
+    class="card {{item.pending ? 'pending' : ''}} {{item.todayDone ? 'done-today' : ''}}"
+    wx:for="{{active}}"
+    wx:key="id"
+    data-note-id="{{item.noteId}}"
+    bindtap="onOpenDetail"
+  >
+    <view class="card-head">
+      <view class="head-main">
+        <text class="title">{{item.label}}</text>
+        <view class="subline">
+          <text>{{item.goalType === 'weekly' ? '周频次' : '连续打卡'}}</text>
+          <text wx:if="{{item.longTerm}}" class="dot-sep">·</text>
+          <text wx:if="{{item.longTerm}}">长期</text>
+        </view>
+      </view>
+      <view class="status {{item.todayDone ? 'is-done' : (item.pending ? 'is-pending' : 'is-idle')}}">
+        <view class="status-dot"></view>
+        <text>{{item.todayDone ? '今日已打' : (item.pending ? '待打卡' : '进行中')}}</text>
+      </view>
     </view>
-    <view class="meta">
-      <view>{{item.goalType === 'weekly' ? '周频次' : '连续打卡'}}{{item.longTerm ? ' · 长期坚持' : ''}}</view>
-      <view>进度 {{item.progressText}}</view>
-      <view wx:if="{{item.recent}}">最近：{{item.recent}}</view>
+
+    <view class="progress-row">
+      <text class="progress-num"><text class="num-strong">{{item.doneCount}}</text><text class="num-muted"> / {{item.target}}</text></text>
+      <text class="progress-hint" wx:if="{{item.recent}}">最近 {{item.recentLast}}</text>
     </view>
     <view class="progress"><view class="progress-bar" style="width: {{item.pct}}%;"></view></view>
-    <view class="actions">
-      <button class="btn primary" size="mini" data-id="{{item.id}}" bindtap="onComplete" disabled="{{item.todayDone}}">今日打卡</button>
-      <button class="btn" size="mini" data-id="{{item.id}}" bindtap="onMakeup">补卡</button>
-      <button class="btn ghost" size="mini" data-id="{{item.id}}" bindtap="onStop">结束</button>
+
+    <view class="actions" catchtap="noop">
+      <button class="btn primary" size="mini" data-id="{{item.id}}" catchtap="onComplete" disabled="{{item.todayDone}}">今日打卡</button>
+      <button class="btn" size="mini" data-id="{{item.id}}" catchtap="onMakeup">补卡</button>
+      <button class="btn ghost" size="mini" data-id="{{item.id}}" catchtap="onStop">结束</button>
     </view>
   </view>
 </block>
 <view class="empty" wx:else>
   <view>暂无进行中</view>
-  <view>去「记录」看做法，点标题旁 ✓ 再开启打卡</view>
+  <view>去「美食 / 美容 / 学习」看内容，详情页可开启打卡</view>
 </view>
 
-<view class="section-title">已结束 · {{ended.length}}</view>
+<view class="section-title ended-title">
+  <text class="section-label">已结束</text>
+  <text class="section-count">{{ended.length}}</text>
+</view>
 <block wx:if="{{ended.length}}">
-  <view class="card" wx:for="{{ended}}" wx:key="id">
-    <view class="row-top">
-      <text class="title">{{item.label}}</text>
-      <text class="badge">已结束</text>
+  <view class="card ended" wx:for="{{ended}}" wx:key="id" data-note-id="{{item.noteId}}" bindtap="onOpenDetail">
+    <view class="card-head">
+      <view class="head-main">
+        <text class="title">{{item.label}}</text>
+        <view class="subline">
+          <text>上次 {{item.progressText}}</text>
+          <text wx:if="{{item.longTerm}}" class="dot-sep">·</text>
+          <text wx:if="{{item.longTerm}}">曾长期</text>
+        </view>
+      </view>
+      <view class="status is-ended">
+        <view class="status-dot"></view>
+        <text>已结束</text>
+      </view>
     </view>
-    <view class="meta">
-      <view>上次：{{item.progressText}}{{item.longTerm ? ' · 曾长期' : ''}}</view>
-      <view wx:if="{{item.recent}}">记录：{{item.recent}}</view>
-    </view>
-    <view class="actions">
-      <button class="btn primary" size="mini" data-id="{{item.id}}" bindtap="onResume">继续打卡</button>
+    <view class="actions" catchtap="noop">
+      <button class="btn primary" size="mini" data-id="{{item.id}}" catchtap="onResume">继续打卡</button>
     </view>
   </view>
 </block>
-<view class="meta" style="margin: 8rpx 32rpx 40rpx;" wx:else>还没有已结束的打卡</view>
+<view class="meta quiet" wx:else>还没有已结束的打卡</view>

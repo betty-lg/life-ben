@@ -26,14 +26,35 @@ Page({
   decorate(c, today) {
     const done = engine.progressCount(c, today);
     const pct = Math.min(100, Math.round((done / Math.max(c.target, 1)) * 100));
+    const completions = c.completions || [];
     return {
       ...c,
+      doneCount: done,
       progressText: engine.progressText(c, today),
       pending: engine.isPendingToday(c, today),
-      todayDone: (c.completions || []).includes(today),
+      todayDone: completions.includes(today),
       pct,
-      recent: (c.completions || []).slice(-3).join('、'),
+      recent: completions.slice(-3).join('、'),
+      recentLast: completions.length ? completions[completions.length - 1] : '',
     };
+  },
+
+  noop() {},
+
+  onOpenDetail(e) {
+    const noteId = e.currentTarget.dataset.noteId;
+    if (!noteId) {
+      wx.showToast({ title: '找不到关联内容', icon: 'none' });
+      return;
+    }
+    const note = repo.getNote(noteId);
+    if (!note) {
+      wx.showToast({ title: '内容已删除', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/note-detail/note-detail?id=${noteId}`,
+    });
   },
 
   onComplete(e) {
@@ -63,7 +84,7 @@ Page({
     const id = e.currentTarget.dataset.id;
     wx.showModal({
       title: '结束打卡？',
-      content: '将移到「已结束」，笔记还在「记录」里。',
+      content: '将移到「已结束」，内容仍在对应分类里。',
       success: (res) => {
         if (!res.confirm) return;
         this._mutate(id, (c) => ({
