@@ -1,0 +1,66 @@
+<view class="page">
+  <view class="header">
+    <view class="nav" bindtap="onPrev">‹</view>
+    <view class="title">{{title}}</view>
+    <view class="nav" bindtap="onNext">›</view>
+    <view class="today-btn" bindtap="onToday">今天</view>
+  </view>
+
+  <view class="weekdays">
+    <view class="wd" wx:for="{{['日','一','二','三','四','五','六']}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <view class="grid">
+    <view
+      wx:for="{{cells}}"
+      wx:key="date"
+      class="cell {{item.empty ? 'empty' : ''}} {{item.isToday ? 'today' : ''}} {{item.isSelected ? 'selected' : ''}}"
+      data-date="{{item.date}}"
+      bindtap="onTapDay"
+    >
+      <block wx:if="{{!item.empty}}">
+        <text class="day">{{item.day}}</text>
+        <view class="dot" wx:if="{{item.hasMeal}}"></view>
+      </block>
+    </view>
+  </view>
+
+  <block wx:if="{{hasAnyMeal}}">
+    <view class="meal-block">
+      <view class="meal-block-head">
+        <text class="meal-block-title">{{selectedLabel}}</text>
+      </view>
+
+      <view class="section" wx:for="{{mealSections}}" wx:key="type" wx:for-item="sec">
+        <view wx:if="{{sec.items.length}}">
+          <view class="section-head">
+            <text class="emoji">{{sec.emoji}}</text>
+            <text class="section-label">{{sec.label}}</text>
+            <text class="section-count">{{sec.items.length}}</text>
+          </view>
+          <view class="meal-list">
+            <view
+              class="meal-item"
+              wx:for="{{sec.items}}"
+              wx:key="id"
+              wx:for-item="it"
+              data-id="{{it.id}}"
+              data-type="{{sec.type}}"
+              bindtap="onOpenNote"
+              bindlongpress="onLongPressItem"
+            >
+              <view class="cover">
+                <image wx:if="{{it.imagePath}}" class="cover-img" src="{{it.imagePath}}" mode="aspectFill" />
+                <view wx:else class="cover-placeholder">{{it.firstChar}}</view>
+              </view>
+              <view class="meal-main">
+                <view class="meal-title">{{it.title}}</view>
+                <view class="meal-preview">{{it.preview || '暂无简介'}}</view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

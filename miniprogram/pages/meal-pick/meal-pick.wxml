@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="header">
+    <view class="header-label">为「{{headerLabel}}」选一道菜</view>
+  </view>
+
+  <view class="search-bar">
+    <view class="search-wrap">
+      <text class="search-icon">⌕</text>
+      <input
+        class="search-input"
+        placeholder="搜索名称、摘要…"
+        value="{{keyword}}"
+        confirm-type="search"
+        bindinput="onSearch"
+      />
+      <text class="clear" wx:if="{{keyword}}" bindtap="onClear">×</text>
+    </view>
+  </view>
+
+  <view class="list" wx:if="{{items.length}}">
+    <view
+      class="row {{item.alreadyOnThisSlot ? 'taken' : ''}}"
+      wx:for="{{items}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onPick"
+    >
+      <view class="cover">
+        <image
+          wx:if="{{item.imagePath}}"
+          class="cover-img"
+          src="{{item.imagePath}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="cover-placeholder">{{item.firstChar}}</view>
+      </view>
+      <view class="row-main">
+        <view class="name">
+          <text>{{item.title}}</text>
+          <text class="badge" wx:if="{{item.alreadyOnThisSlot}}">已在这一餐</text>
+        </view>
+        <view class="summary">{{item.preview || '暂无简介'}}</view>
+        <view class="eaten" wx:if="{{item.lastEaten}}">上次：{{item.lastEaten}}</view>
+      </view>
+    </view>
+  </view>
+  <view class="empty" wx:else>
+    <view>{{hasFilter ? '没有匹配的美食' : '还没有美食笔记'}}</view>
+    <view wx:if="{{!hasFilter}}">先去美食 tab 加几道菜再来</view>
+  </view>
+</view>
