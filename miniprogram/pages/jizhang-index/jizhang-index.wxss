@@ -147,8 +147,18 @@
   padding: 8rpx 0 4rpx;
 }
 
+.inline-empty {
+  font-size: 24rpx;
+  color: #bbb;
+  padding: 16rpx 0 24rpx;
+}
+
 .top-item {
-  margin-bottom: 22rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
 .top-item:last-child {
@@ -229,6 +239,14 @@
   font-size: 32rpx;
   color: #E53935;
   font-weight: bold;
+}
+
+.max-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
 .list-header {

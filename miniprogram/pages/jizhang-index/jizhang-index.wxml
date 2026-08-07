@@ -35,27 +35,29 @@
   </view>
 
   <!-- Top3 分类 -->
-  <view class="section-card">
-    <view class="section-title">本月花钱最多</view>
-    <view wx:if="{{topCategories.length === 0}}" class="section-empty">暂无分类数据</view>
-    <view wx:for="{{topCategories}}" wx:key="category" class="top-item">
-      <view class="top-head">
-        <text class="top-rank">{{index + 1}}</text>
-        <text class="top-name">{{item.category}}</text>
-        <text class="top-amount">¥{{item.totalText}}</text>
-      </view>
-      <view class="progress-bar">
-        <view class="progress-fill" style="width:{{item.percent}}%"></view>
-      </view>
-      <text class="top-percent">{{item.percent}}%</text>
+  <view class="list-header">
+    <text>本月花钱最多</text>
+  </view>
+  <view wx:if="{{topCategories.length === 0}}" class="inline-empty">暂无分类数据</view>
+  <view wx:for="{{topCategories}}" wx:key="category" class="top-item">
+    <view class="top-head">
+      <text class="top-rank">{{index + 1}}</text>
+      <text class="top-name">{{item.category}}</text>
+      <text class="top-amount">¥{{item.totalText}}</text>
     </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width:{{item.percent}}%"></view>
+    </view>
+    <text class="top-percent">{{item.percent}}%</text>
   </view>
 
   <!-- 最大单笔 -->
-  <view class="section-card">
-    <view class="section-title">本月最大单笔</view>
-    <view wx:if="{{!maxExpense}}" class="section-empty">暂无记录</view>
-    <view wx:else class="max-row">
+  <view class="list-header">
+    <text>本月最大单笔</text>
+  </view>
+  <view wx:if="{{!maxExpense}}" class="inline-empty">暂无记录</view>
+  <view wx:else class="max-card">
+    <view class="max-row">
       <text class="max-category">{{maxExpense.category}}</text>
       <text class="max-meta">{{maxExpense.date}}</text>
       <text class="max-amount">¥{{maxExpense.amount}}</text>

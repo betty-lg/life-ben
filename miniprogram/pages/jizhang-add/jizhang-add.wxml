@@ -10,14 +10,40 @@
       </view>
     </view>
 
-    <!-- 分类选择 -->
+    <!-- 分类选择（accordion 卡片组） -->
     <view class="form-item">
       <text class="label">分类</text>
-      <view class="category-grid">
-        <view wx:for="{{categories}}" wx:key="index" 
-          class="category-tag {{selectedCategory === item ? 'active' : ''}}"
-          bindtap="selectCategory" data-category="{{item}}">
-          {{item}}
+      <view class="category-list">
+        <view
+          wx:for="{{categoryTree}}"
+          wx:key="name"
+          wx:for-item="cat"
+          class="cat-group {{cat.expanded ? 'expanded' : ''}} {{selectedCategory === cat.name && !selectedSub ? 'selected' : ''}}"
+        >
+          <!-- 1 级 header -->
+          <view
+            class="cat-level-1"
+            data-name="{{cat.name}}"
+            bindtap="onToggleExpand"
+          >
+            <text class="cat-name">{{cat.name}}</text>
+            <view class="cat-right">
+              <text wx:if="{{selectedCategory === cat.name && !selectedSub}}" class="cat-check">✓</text>
+              <text wx:if="{{cat.subcategories.length}}" class="cat-arrow {{cat.expanded ? 'rotate' : ''}}">›</text>
+            </view>
+          </view>
+          <!-- 2 级子分类（accordion 展开） -->
+          <view wx:if="{{cat.expanded && cat.subcategories.length}}" class="cat-sub-wrap">
+            <view
+              wx:for="{{cat.subcategories}}"
+              wx:key="*this"
+              wx:for-item="sub"
+              class="cat-tag cat-level-2 {{selectedSub === sub ? 'active' : ''}}"
+              data-category="{{cat.name}}"
+              data-sub="{{sub}}"
+              bindtap="onPickSub"
+            >{{sub}}</view>
+          </view>
         </view>
       </view>
     </view>

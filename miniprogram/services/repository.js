@@ -17,6 +17,7 @@ function load() {
       checkins: Array.isArray(raw.checkins) ? raw.checkins : [],
       expenses: Array.isArray(raw.expenses) ? raw.expenses : [],
       categories: Array.isArray(raw.categories) ? raw.categories : [],
+      budgets: Array.isArray(raw.budgets) ? raw.budgets : [],
     };
   } catch (e) {
     return emptyDoc();
@@ -30,6 +31,7 @@ function save(doc) {
     checkins: doc.checkins || [],
     expenses: doc.expenses || [],
     categories: doc.categories || [],
+    budgets: doc.budgets || [],
   };
   try {
     wx.setStorageSync(STORAGE_KEY, payload);
@@ -234,6 +236,37 @@ function clearExpenses() {
 }
 
 /**
+ * Budgets helpers — each entry is { category: string, budget: number }
+ * (budget per category, monthly). Used by jizhang-stats page.
+ */
+function getBudgets() {
+  const doc = load();
+  return Array.isArray(doc.budgets) ? doc.budgets : [];
+}
+
+function setBudgets(list) {
+  const doc = load();
+  doc.budgets = Array.isArray(list) ? list : [];
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, budgets: doc.budgets };
+}
+
+/** Returns the stored categories list (mixed string/object array) */
+function getCategories() {
+  const doc = load();
+  return Array.isArray(doc.categories) ? doc.categories : [];
+}
+
+function setCategories(list) {
+  const doc = load();
+  doc.categories = Array.isArray(list) ? list : [];
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, categories: doc.categories };
+}
+
+/**
  * One-time migration: if old standalone 'expenses' or 'categories' keys exist in storage
  * but life_ben_v1 doesn't have them yet, fold them in.
  */
@@ -361,6 +394,10 @@ module.exports = {
   addExpense,
   deleteExpense,
   clearExpenses,
+  getBudgets,
+  setBudgets,
+  getCategories,
+  setCategories,
   migrateLegacyStorage,
   seedIfEmpty,
   uid,

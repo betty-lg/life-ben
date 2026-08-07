@@ -1,5 +1,5 @@
 const repo = require('./services/repository');
-const { syncCategories } = require('./utils/jizhang-categories');
+const { syncCategories, getAllCategoryBudgets } = require('./utils/jizhang-categories');
 
 App({
   onLaunch() {
@@ -13,10 +13,20 @@ App({
     } catch (e) {
       console.warn('seed failed', e);
     }
+    let categories = [];
     try {
-      syncCategories();
+      categories = syncCategories();
     } catch (e) {
       console.warn('sync categories failed', e);
+    }
+    // Initialize default budgets per category if not yet set
+    try {
+      if (!repo.getBudgets().length) {
+        const defaults = getAllCategoryBudgets(categories);
+        if (defaults.length) repo.setBudgets(defaults);
+      }
+    } catch (e) {
+      console.warn('init budgets failed', e);
     }
   },
 });

@@ -4,7 +4,9 @@ const {
 } = require('../../utils/jizhang-categories');
 
 const {
-  toDateKey
+  toDateKey,
+  filterByPeriod,
+  sumAmount
 } = require('../../utils/jizhang-stats');
 
 Page({
@@ -24,13 +26,19 @@ Page({
       direction: 'same',
       dayHint: ''
     },
-    monthlyData: []
+    monthlyData: [],
+    budgets: [],
+    grandBudget: 0,
+    grandBudgetText: '0',
+    grandSpent: 0,
+    grandSpentText: '0.00'
   },
 
   onShow() {
     this.loadStats();
     this.loadTrend();
     this.loadMonthly();
+    this.loadBudgets();
   },
 
   loadStats() {
@@ -201,6 +209,61 @@ Page({
       content: msg,
       showCancel: false,
       confirmText: '知道了'
+    });
+  },
+
+  /**
+   * Monthly budget vs spent for each category. Pulls budgets from storage
+   * (defaulted in app.js onLaunch) and current-month spend from expenses.
+   */
+  loadBudgets() {
+    const budgets = repo.getBudgets();
+    if (!budgets.length) {
+      this.setData({ budgets: [] });
+      return;
+    }
+
+    const expenses = repo.getExpenses();
+    const now = new Date();
+    const monthItems = filterByPeriod(expenses, 'month', now);
+    const monthTotal = sumAmount(monthItems);
+
+    // Build a quick lookup of spent per category this month
+    const spentMap = {};
+    monthItems.forEach(item => {
+      const key = item.category || '其他';
+      spentMap[key] = (spentMap[key] || 0) + (Number(item.amount) || 0);
+    });
+
+    const grandBudget = budgets.reduce((s, b) => s + (Number(b.budget) || 0), 0);
+
+    const items = budgets.map(b => {
+      const budget = Number(b.budget) || 0;
+      const spent = spentMap[b.category] || 0;
+      const over = budget > 0 && spent > budget;
+      const left = budget - spent;
+      const percentRaw = budget > 0 ? (spent / budget) * 100 : 0;
+      const percent = Math.min(percentRaw, 100);
+      const percentText = percentRaw.toFixed(0);
+      return {
+        category: b.category,
+        budget,
+        budgetText: budget.toFixed(0),
+        spent,
+        spentText: spent.toFixed(2),
+        over,
+        leftText: Math.abs(left).toFixed(2),
+        percent: percent.toFixed(0),
+        percentText,
+      };
+    });
+
+    this.setData({
+      budgets: items,
+      grandBudget,
+      grandBudgetText: grandBudget.toFixed(0),
+      grandSpent: monthTotal,
+      grandSpentText: monthTotal.toFixed(2),
     });
   }
 });

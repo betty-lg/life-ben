@@ -67,6 +67,104 @@
   border-color: #4CAF50;
 }
 
+/* 2-level category tree (accordion card group) */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.cat-group {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  transition: padding 0.2s ease;
+}
+
+.cat-group.expanded {
+  padding-bottom: 20rpx;
+}
+
+.cat-group.selected {
+  background: #E8F5E9;
+}
+
+.cat-level-1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44rpx;
+}
+
+.cat-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.cat-group.selected .cat-name {
+  color: #2E7D32;
+  font-weight: 600;
+}
+
+.cat-right {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.cat-check {
+  font-size: 30rpx;
+  color: #2E7D32;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cat-arrow {
+  font-size: 40rpx;
+  color: #999;
+  line-height: 1;
+  font-weight: 300;
+  display: inline-block;
+  transform: rotate(0deg);
+  transition: transform 0.25s ease;
+}
+
+.cat-arrow.rotate {
+  transform: rotate(90deg);
+}
+
+.cat-sub-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  padding-left: 4rpx;
+  margin-top: 16rpx;
+}
+
+.cat-tag {
+  display: inline-block;
+  padding: 10rpx 22rpx;
+  background: #f0f0f0;
+  border-radius: 36rpx;
+  font-size: 24rpx;
+  color: #666;
+  border: 2rpx solid transparent;
+}
+
+.cat-tag.cat-level-2 {
+  font-size: 24rpx;
+  padding: 10rpx 22rpx;
+}
+
+.cat-tag.active {
+  background: #E8F5E9;
+  color: #2E7D32;
+  border-color: #4CAF50;
+  font-weight: 600;
+}
+
 .picker-value {
   padding: 20rpx 0;
   font-size: 30rpx;
