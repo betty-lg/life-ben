@@ -71,6 +71,42 @@ function serializeMaterials(groups) {
   return parts.join('\n');
 }
 
+/**
+ * 老 `steps` string → 步骤卡片数组（用于首次进入编辑页时回填 UI）
+ * 兼容编号前缀：'1. xxx' / '1、xxx' / '1) xxx' / '① xxx' / '第一步：xxx'
+ */
+function parseSteps(raw) {
+  const text = (raw || '').trim();
+  if (!text) return [{ text: '', imagePath: '' }];
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
+  if (!lines.length) return [{ text: '', imagePath: '' }];
+  return lines.map((line) => ({
+    text: line.replace(/^\d+[、.)]\s*/, '').replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/, '').replace(/^第[一二三四五六七八九十百千]+步[：:]\s*/, ''),
+    imagePath: '',
+  }));
+}
+
+/**
+ * 步骤卡片数组 → string（'1. xxx\n2. yyy'），用于 fields.js composeBody
+ * 空文字的步骤会被跳过（空步骤不计入编号，保持显示连续）
+ * 纯图片（无文字）也会被跳过——图片信息存于 stepItems，string 仅承载文字
+ */
+function serializeSteps(items) {
+  let n = 0;
+  const out = [];
+  (items || []).forEach((it) => {
+    const t = (it && it.text || '').trim();
+    if (t) {
+      n += 1;
+      out.push(`${n}. ${t}`);
+    }
+  });
+  return out.join('\n');
+}
+
 Page({
   data: {
     id: '',
@@ -79,6 +115,7 @@ Page({
     intro: '',
     materials: '',
     matGroups: [{ name: '', rows: [{ name: '', amount: '' }] }],
+    stepItems: [{ text: '', imagePath: '' }],
     steps: '',
     tips: '',
     body: '',
@@ -102,6 +139,9 @@ Page({
       if (note) {
         this.applyCategory(note.category);
         const tags = note.tags || [];
+        const stepItems = Array.isArray(note.stepItems) && note.stepItems.length
+          ? note.stepItems.map((it) => ({ text: it.text || '', imagePath: it.imagePath || '' }))
+          : parseSteps(note.steps);
         this.setData({
           id: note.id,
           title: note.title,
@@ -109,6 +149,7 @@ Page({
           intro: note.intro || '',
           materials: note.materials || '',
           matGroups: parseMaterials(note.materials),
+          stepItems,
           steps: note.steps || '',
           tips: note.tips || '',
           body: note.body || '',
@@ -155,7 +196,6 @@ Page({
 
   onTitle(e) { this.setData({ title: e.detail.value }); },
   onIntro(e) { this.setData({ intro: e.detail.value }); },
-  onSteps(e) { this.setData({ steps: e.detail.value }); },
   onTips(e) { this.setData({ tips: e.detail.value }); },
   onBody(e) { this.setData({ body: e.detail.value }); },
 
@@ -221,6 +261,65 @@ Page({
     this._syncMat();
   },
 
+  onAddStep() {
+    const items = this.data.stepItems.concat({ text: '', imagePath: '' });
+    this.setData({ stepItems: items });
+  },
+
+  onDelStep(e) {
+    const idx = e.currentTarget.dataset.idx;
+    let items = this.data.stepItems.filter((_, i) => i !== idx);
+    if (!items.length) items = [{ text: '', imagePath: '' }];
+    this.setData({ stepItems: items });
+  },
+
+  onStepText(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const key = `stepItems[${idx}].text`;
+    this.setData({ [key]: e.detail.value });
+  },
+
+  onChooseStepImage(e) {
+    const idx = e.currentTarget.dataset.idx;
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempPath = res.tempFiles && res.tempFiles[0] && res.tempFiles[0].tempFilePath;
+        if (!tempPath) return;
+        wx.showLoading({ title: '保存中', mask: true });
+        wx.getFileSystemManager().saveFile({
+          tempFilePath: tempPath,
+          success: (r) => {
+            wx.hideLoading();
+            const key = `stepItems[${idx}].imagePath`;
+            this.setData({ [key]: r.savedFilePath });
+          },
+          fail: () => {
+            wx.hideLoading();
+            const key = `stepItems[${idx}].imagePath`;
+            this.setData({ [key]: tempPath });
+          },
+        });
+      },
+    });
+  },
+
+  onDelStepImage(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const key = `stepItems[${idx}].imagePath`;
+    this.setData({ [key]: '' });
+  },
+
+  onPreviewStepImage(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const urls = (this.data.stepItems || []).map((it) => it.imagePath).filter(Boolean);
+    const current = (this.data.stepItems[idx] || {}).imagePath;
+    if (!current) return;
+    wx.previewImage({ urls, current });
+  },
+
   onChooseImage() {
     wx.chooseMedia({
       count: 1,
@@ -250,8 +349,12 @@ Page({
   },
 
   onSave() {
-    const { id, title, imagePath, intro, steps, tips, body, category, isLearn, tags, mealDate, mealType } = this.data;
+    const { id, title, imagePath, intro, stepItems, tips, body, category, isLearn, tags, mealDate, mealType } = this.data;
     const materials = serializeMaterials(this.data.matGroups);
+    const steps = serializeSteps(stepItems);
+    const cleanStepItems = (stepItems || [])
+      .map((it) => ({ text: (it.text || '').trim(), imagePath: it.imagePath || '' }))
+      .filter((it) => it.text || it.imagePath);
 
     let finalTitle = (title || '').trim();
     if (isLearn && !finalTitle) finalTitle = '句子';
@@ -278,6 +381,7 @@ Page({
       intro: isLearn ? '' : intro,
       materials: isLearn ? '' : materials,
       steps: isLearn ? '' : steps,
+      stepItems: isLearn ? [] : cleanStepItems,
       tips: isLearn ? '' : tips,
       tags: tags,
       body: isLearn ? body : composeBody({ materials, steps, tips, intro }),

@@ -92,6 +92,49 @@
   font-size: 28rpx;
   line-height: 1.75;
   color: #2a2a28;
+}
+
+/* 步骤展示（带编号 + 可选配图） */
+.step-display {
+  margin-bottom: 20rpx;
+  padding: 18rpx 20rpx;
+  background: #faf9f5;
+  border: 1rpx solid #eceae4;
+  border-radius: 12rpx;
+}
+
+.step-display:last-child {
+  margin-bottom: 0;
+}
+
+.step-display-head {
+  display: inline-block;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #2f6b4f;
+  background: #e4f0e9;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-bottom: 10rpx;
+}
+
+.step-display-text {
+  display: block;
+  font-size: 28rpx;
+  line-height: 1.75;
+  color: #2a2a28;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.step-display-img {
+  display: block;
+  margin-top: 14rpx;
+  width: 100%;
+  max-width: 520rpx;
+  height: 360rpx;
+  border-radius: 10rpx;
+  background: #eceae4;
   white-space: pre-wrap;
 }
 

@@ -17,6 +17,8 @@ Page({
     hasEnded: false,
     endedId: '',
     learnTags: [],
+    stepItems: [],
+    hasStepItems: false,
   },
 
   onLoad(query) {
@@ -60,6 +62,11 @@ Page({
       icon: LEARN_TAG_ICON[name] || '',
     }));
 
+    const stepItems = Array.isArray(note.stepItems)
+      ? note.stepItems.filter((it) => it && ((it.text || '').trim() || it.imagePath))
+      : [];
+    const hasStepItems = stepItems.length > 0;
+
     this.setData({
       note,
       firstChar,
@@ -72,6 +79,8 @@ Page({
       hasEnded: !active && !!ended,
       endedId: ended ? ended.id : '',
       learnTags,
+      stepItems,
+      hasStepItems,
     });
   },
 
@@ -130,5 +139,13 @@ Page({
     const path = this.data.note && this.data.note.imagePath;
     if (!path) return;
     wx.previewImage({ urls: [path], current: path });
+  },
+
+  onPreviewStepImage(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const urls = (this.data.stepItems || []).map((it) => it.imagePath).filter(Boolean);
+    const current = (this.data.stepItems[idx] || {}).imagePath;
+    if (!current) return;
+    wx.previewImage({ urls, current });
   },
 });

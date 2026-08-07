@@ -74,8 +74,32 @@
       <view class="mat-add-group" bindtap="onAddMatGroup">+ 添加一组</view>
     </view>
     <view class="field">
-      <view class="label">步骤</view>
-      <textarea placeholder="按顺序写步骤…" value="{{steps}}" bindinput="onSteps" maxlength="5000" auto-height />
+      <view class="label">步骤<text class="label-hint">每步可配一张图</text></view>
+      <view class="step-list">
+        <view class="step-item" wx:for="{{stepItems}}" wx:key="index" wx:for-index="idx">
+          <view class="step-head">
+            <view class="step-num">步骤 {{idx + 1}}</view>
+            <view class="step-del" data-idx="{{idx}}" bindtap="onDelStep" wx:if="{{stepItems.length > 1}}">删除</view>
+          </view>
+          <textarea
+            class="step-text"
+            placeholder="这一步做什么…"
+            value="{{item.text}}"
+            data-idx="{{idx}}"
+            bindinput="onStepText"
+            maxlength="500"
+            auto-height
+          />
+          <view class="step-img-row">
+            <view class="step-img-box" wx:if="{{item.imagePath}}" data-idx="{{idx}}" bindtap="onPreviewStepImage">
+              <image src="{{item.imagePath}}" mode="aspectFill" />
+              <view class="step-img-del" data-idx="{{idx}}" catchtap="onDelStepImage">×</view>
+            </view>
+            <view class="step-img-upload" wx:else data-idx="{{idx}}" bindtap="onChooseStepImage">+ 上传配图</view>
+          </view>
+        </view>
+      </view>
+      <view class="step-add" bindtap="onAddStep">+ 添加步骤</view>
     </view>
     <view class="field">
       <view class="label">注意事项</view>

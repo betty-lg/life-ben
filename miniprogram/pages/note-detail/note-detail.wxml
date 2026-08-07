@@ -54,7 +54,23 @@
         </view>
       </view>
     </view>
-    <view class="method-block" wx:if="{{note.steps}}">
+    <view class="method-block" wx:if="{{hasStepItems}}">
+      <view class="method-label">步骤</view>
+      <view class="step-display" wx:for="{{stepItems}}" wx:key="index" wx:for-index="idx">
+        <view class="step-display-head">步骤 {{idx + 1}}</view>
+        <text wx:if="{{item.text}}" class="step-display-text" user-select>{{item.text}}</text>
+        <image
+          wx:if="{{item.imagePath}}"
+          class="step-display-img"
+          src="{{item.imagePath}}"
+          mode="aspectFill"
+          data-url="{{item.imagePath}}"
+          data-idx="{{idx}}"
+          bindtap="onPreviewStepImage"
+        />
+      </view>
+    </view>
+    <view class="method-block" wx:elif="{{note.steps}}">
       <view class="method-label">步骤</view>
       <text class="method-body" user-select>{{note.steps}}</text>
     </view>
