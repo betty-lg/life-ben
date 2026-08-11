@@ -352,3 +352,47 @@
   padding: 10rpx;
   margin-left: 10rpx;
 }
+
+/* 备份导出卡片 */
+.backup-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin: 40rpx 32rpx 24rpx;
+  padding: 28rpx 28rpx;
+  background: #fff;
+  border: 1rpx solid #d8d6cf;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 6rpx rgba(28, 28, 26, 0.04);
+}
+
+.backup-icon {
+  font-size: 40rpx;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.backup-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.backup-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2a2a28;
+  margin-bottom: 6rpx;
+}
+
+.backup-hint {
+  font-size: 22rpx;
+  color: #9a9a94;
+  line-height: 1.5;
+}
+
+.backup-arrow {
+  font-size: 36rpx;
+  color: #c2c0b8;
+  line-height: 1;
+  flex-shrink: 0;
+}

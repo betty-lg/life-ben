@@ -1,4 +1,5 @@
 const repo = require('../../services/repository');
+const backup = require('../../services/backup');
 const {
   getPeriodTotal,
   getMonthComparison,
@@ -11,6 +12,7 @@ Page({
   data: {
     todayTotal: '0.00',
     monthTotal: '0.00',
+    exporting: false,
     yearTotal: '0.00',
     monthCompare: {
       diffText: '与上月持平',
@@ -113,5 +115,64 @@ Page({
 
   onGoStats() {
     wx.navigateTo({ url: '/pages/jizhang-stats/jizhang-stats' });
+  },
+
+  async onExport() {
+    if (this.data.exporting) return;
+    const stats = repo.load();
+    const noteCount = (stats.notes || []).length;
+    const expCount = (stats.expenses || []).length;
+    if (noteCount === 0 && expCount === 0) {
+      wx.showModal({
+        title: '没有数据可导出',
+        content: '目前还没有笔记或记账记录。先添加一些内容再导出。',
+        showCancel: false,
+        confirmText: '好',
+      });
+      return;
+    }
+    this.setData({ exporting: true });
+    wx.showLoading({ title: '打包中…', mask: true });
+    try {
+      const result = await backup.exportToFile();
+      wx.hideLoading();
+      this.setData({ exporting: false });
+      const sizeText = backup.humanSize(result.sizeBytes);
+      const imgCount = result.stats.imageCount;
+      const imgFail = result.stats.imageFailures;
+      const imgHint = imgFail > 0 ? `（${imgFail} 张图读取失败，可能已被微信清理）` : '';
+      wx.showModal({
+        title: '导出成功',
+        content:
+          `文件：${result.fileName}\n` +
+          `大小：${sizeText}\n` +
+          `笔记 ${result.stats.notes} 条 · 记账 ${result.stats.expenses} 条 · 打卡 ${result.stats.checkins} 条\n` +
+          `图片 ${imgCount} 张${imgHint}\n\n` +
+          `点击「分享到微信」保存到文件传输助手（建议每周/每月导出一次）`,
+        confirmText: '分享到微信',
+        cancelText: '稍后',
+        success: (res) => {
+          if (res.confirm) {
+            wx.shareFileMessage({
+              filePath: result.filePath,
+              success: () => {
+                wx.showToast({ title: '已分享', icon: 'success' });
+              },
+              fail: () => {
+                wx.showToast({ title: '分享取消', icon: 'none' });
+              },
+            });
+          }
+        },
+      });
+    } catch (e) {
+      wx.hideLoading();
+      this.setData({ exporting: false });
+      wx.showModal({
+        title: '导出失败',
+        content: '打包数据时出错：' + (e && e.errMsg ? e.errMsg : JSON.stringify(e)),
+        showCancel: false,
+      });
+    }
   }
 });
