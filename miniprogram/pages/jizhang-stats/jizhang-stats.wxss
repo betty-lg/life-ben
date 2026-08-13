@@ -359,6 +359,90 @@
   flex-shrink: 0;
 }
 
+.note-meta {
+  font-size: 22rpx;
+  color: #aaa;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.note-item.unclassified .note-name {
+  color: #999;
+  font-style: italic;
+}
+
+/* 2 级子分类 */
+.sub-list {
+  margin-top: 16rpx;
+}
+
+.sub-block {
+  background: #faf9f5;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+  margin-bottom: 12rpx;
+  border: 1rpx solid #eceae4;
+}
+
+.sub-block.ungrouped {
+  background: #f5f5f0;
+  border-style: dashed;
+}
+
+.sub-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.sub-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2f6b4f;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub-block.ungrouped .sub-name {
+  color: #888;
+  font-weight: 500;
+}
+
+.sub-meta {
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.sub-amount {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #E53935;
+  flex-shrink: 0;
+}
+
+.sub-block .note-list {
+  margin-top: 10rpx;
+  border-top: 1rpx dashed #e6e4de;
+  padding-top: 4rpx;
+}
+
+.sub-block .note-item {
+  padding: 12rpx 0 12rpx 8rpx;
+  font-size: 26rpx;
+}
+
+.sub-block .note-name {
+  font-size: 26rpx;
+}
+
+.sub-block .note-amount {
+  font-size: 26rpx;
+}
+
 .empty {
   text-align: center;
   color: #999;

@@ -197,103 +197,121 @@ function normalizeNote(note) {
 }
 
 /**
- * 按「分类 → (子分类?) → 备注」汇总：备注相同合并金额，不同则分开展示
- * 子分类（subcategory）独立展示在该 1 级分类下
- * @returns {Array<{category, total, count, percent, totalText, notes: Array}>}
- * notes 在该分类有多个子分类 或 有备注差异时展开
+ * 按「分类 → 子分类 → 备注」三层汇总：
+ *   - 每个 1 级分类下：列出所有 2 级子分类（按金额降序），每项有自己的金额汇总 + 占比
+ *   - 每个 2 级子分类下：列出该 2 级下每条备注的金额汇总
+ *   - 1 级下没填 2 级的，归到「未细分」虚拟子分类下，同样列出备注
+ *
+ * @returns {{
+ *   grandTotal: number,
+ *   stats: Array<{
+ *     category: string,
+ *     total: number, totalText: string, count: number, percent: string,
+ *     subcategories: Array<{
+ *       name: string, isSubcategory: boolean,
+ *       total: number, totalText: string, count: number, percent: string,
+ *       notes: Array<{ name, total, totalText, count, isUnclassified }>
+ *     }>
+ *   }>
+ * }}
  */
 function buildCategoryStatsWithNotes(expenses) {
   const list = expenses || [];
   if (!list.length) return { grandTotal: 0, stats: [] };
 
+  // 三层聚合: map[category].subMap[sub].noteMap[noteKey] = { total, count }
+  // 1 级下未填 2 级的 -> map[category].ungroupedNotes[noteKey] = { total, count }
   const map = {};
   list.forEach(item => {
     const category = item.category || '其他';
-    const sub = item.subcategory || '';
-    // key: category|sub
-    const key = sub ? category + '|' + sub : category;
+    const sub = (item.subcategory || '').trim();
     const noteKey = normalizeNote(item.note);
     const amount = Number(item.amount) || 0;
 
     if (!map[category]) {
-      map[category] = {
-        total: 0,
-        count: 0,
-        subs: {}, // sub-name -> { total, count, notes: {} }
-        ungroupedNotes: null // notes when no sub
-      };
+      map[category] = { total: 0, count: 0, subMap: {}, ungroupedNotes: null };
     }
     map[category].total += amount;
     map[category].count += 1;
 
     if (sub) {
-      if (!map[category].subs[sub]) {
-        map[category].subs[sub] = { total: 0, count: 0, notes: {} };
+      if (!map[category].subMap[sub]) {
+        map[category].subMap[sub] = { total: 0, count: 0, noteMap: {} };
       }
-      const sEntry = map[category].subs[sub];
-      sEntry.total += amount;
-      sEntry.count += 1;
-      if (!sEntry.notes[noteKey]) sEntry.notes[noteKey] = { total: 0, count: 0 };
-      sEntry.notes[noteKey].total += amount;
-      sEntry.notes[noteKey].count += 1;
+      const s = map[category].subMap[sub];
+      s.total += amount;
+      s.count += 1;
+      if (!s.noteMap[noteKey]) s.noteMap[noteKey] = { total: 0, count: 0 };
+      s.noteMap[noteKey].total += amount;
+      s.noteMap[noteKey].count += 1;
     } else {
-      if (!map[category].ungroupedNotes) {
-        map[category].ungroupedNotes = {};
-      }
-      const notes = map[category].ungroupedNotes;
-      if (!notes[noteKey]) notes[noteKey] = { total: 0, count: 0 };
-      notes[noteKey].total += amount;
-      notes[noteKey].count += 1;
+      if (!map[category].ungroupedNotes) map[category].ungroupedNotes = {};
+      const u = map[category].ungroupedNotes;
+      if (!u[noteKey]) u[noteKey] = { total: 0, count: 0 };
+      u[noteKey].total += amount;
+      u[noteKey].count += 1;
     }
   });
 
   const grandTotal = Object.keys(map).reduce((s, k) => s + map[k].total, 0);
 
   const stats = Object.keys(map)
-    .map(category => {
+    .map((category) => {
       const entry = map[category];
-      const subNames = Object.keys(entry.subs);
-      const ungrouped = entry.ungroupedNotes || {};
-      const ungroupedKeys = Object.keys(ungrouped);
+      const subList = [];
 
-      // Decide if we need to show detail rows:
-      // - any sub-categories exist
-      // - OR any sub-category has note variance
-      // - OR ungrouped (no-sub) items have note variance
-      const subHasNotes = subNames.some(s => {
-        const nk = Object.keys(entry.subs[s].notes);
-        return nk.some(k => k !== '未备注') || nk.length > 1;
-      });
-      const ungroupedHasNotes = ungroupedKeys.some(k => k !== '未备注') || ungroupedKeys.length > 1;
-      const showDetail = subNames.length > 0 || subHasNotes || ungroupedHasNotes;
-
-      const notes = [];
-      if (showDetail) {
-        // Sub-category rows first
-        subNames.forEach(sub => {
-          const subEntry = entry.subs[sub];
-          notes.push({
-            name: sub,
-            isSubcategory: true,
-            total: subEntry.total,
-            totalText: subEntry.total.toFixed(2),
-            count: subEntry.count
-          });
+      // 2 级子分类
+      Object.keys(entry.subMap).forEach((subName) => {
+        const subEntry = entry.subMap[subName];
+        const noteKeys = Object.keys(subEntry.noteMap);
+        const notes = noteKeys
+          .map((name) => ({
+            name: name === '未备注' ? '（未备注）' : name,
+            total: subEntry.noteMap[name].total,
+            totalText: subEntry.noteMap[name].total.toFixed(2),
+            count: subEntry.noteMap[name].count,
+            isUnclassified: name === '未备注',
+          }))
+          .sort((a, b) => b.total - a.total);
+        subList.push({
+          name: subName,
+          isSubcategory: true,
+          total: subEntry.total,
+          totalText: subEntry.total.toFixed(2),
+          count: subEntry.count,
+          percent: entry.total > 0 ? ((subEntry.total / entry.total) * 100).toFixed(1) : '0.0',
+          notes,
         });
-        // Then ungrouped (no sub) notes by note
-        if (ungroupedKeys.length) {
-          ungroupedKeys
-            .map(name => ({
-              name: name === '未备注' ? '（未细分 / 未备注）' : name,
-              isSubcategory: false,
-              total: ungrouped[name].total,
-              totalText: ungrouped[name].total.toFixed(2),
-              count: ungrouped[name].count,
-            }))
-            .sort((a, b) => b.total - a.total)
-            .forEach(n => notes.push(n));
-        }
+      });
+
+      // 1 级下未填 2 级的 → 「未细分」
+      if (entry.ungroupedNotes) {
+        const u = entry.ungroupedNotes;
+        const uKeys = Object.keys(u);
+        const uTotal = uKeys.reduce((s, k) => s + u[k].total, 0);
+        const uCount = uKeys.reduce((s, k) => s + u[k].count, 0);
+        const notes = uKeys
+          .map((name) => ({
+            name: name === '未备注' ? '（未备注）' : name,
+            total: u[name].total,
+            totalText: u[name].total.toFixed(2),
+            count: u[name].count,
+            isUnclassified: name === '未备注',
+          }))
+          .sort((a, b) => b.total - a.total);
+        subList.push({
+          name: '未细分',
+          isSubcategory: false,
+          total: uTotal,
+          totalText: uTotal.toFixed(2),
+          count: uCount,
+          percent: entry.total > 0 ? ((uTotal / entry.total) * 100).toFixed(1) : '0.0',
+          notes,
+        });
       }
+
+      // 统一按金额降序（包括「未细分」）
+      subList.sort((a, b) => b.total - a.total);
 
       return {
         category,
@@ -301,7 +319,7 @@ function buildCategoryStatsWithNotes(expenses) {
         totalText: entry.total.toFixed(2),
         count: entry.count,
         percent: grandTotal > 0 ? ((entry.total / grandTotal) * 100).toFixed(1) : '0.0',
-        notes
+        subcategories: subList,
       };
     })
     .sort((a, b) => b.total - a.total);

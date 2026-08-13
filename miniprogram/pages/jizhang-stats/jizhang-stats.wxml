@@ -62,9 +62,9 @@
     </view>
   </view>
 
-  <!-- 分类统计：名称 + 金额，下面是备注细分 -->
+  <!-- 分类统计：1 级分类 → 2 级子分类 → 备注 三层 -->
   <view class="section-title">分类统计</view>
-  <view class="section-hint">下方为备注细分：相同合并，不同分开</view>
+  <view class="section-hint">点 1 级分类看全部明细；下方按子分类汇总</view>
 
   <view wx:for="{{stats}}" wx:key="category" class="stat-block">
     <view class="stat-head" bindtap="showCategoryDetail" data-category="{{item.category}}">
@@ -73,10 +73,22 @@
     </view>
     <view class="stat-sub">{{item.count}}笔 · 占比 {{item.percent}}%</view>
 
-    <view wx:if="{{item.notes.length > 0}}" class="note-list">
-      <view wx:for="{{item.notes}}" wx:for-item="note" wx:key="name" class="note-item">
-        <text class="note-name">{{note.name}}</text>
-        <text class="note-amount">¥{{note.totalText}}</text>
+    <!-- 2 级子分类卡片 -->
+    <view wx:if="{{item.subcategories.length > 0}}" class="sub-list">
+      <view wx:for="{{item.subcategories}}" wx:for-item="sub" wx:key="name" class="sub-block {{sub.isSubcategory ? '' : 'ungrouped'}}">
+        <view class="sub-head">
+          <text class="sub-name">{{sub.name}}</text>
+          <text class="sub-meta">{{sub.count}}笔 · 占比 {{sub.percent}}%</text>
+          <text class="sub-amount">¥{{sub.totalText}}</text>
+        </view>
+        <!-- 备注行（2 级下所有笔记的备注聚合） -->
+        <view wx:if="{{sub.notes.length > 0}}" class="note-list">
+          <view wx:for="{{sub.notes}}" wx:for-item="note" wx:key="name" class="note-item {{note.isUnclassified ? 'unclassified' : ''}}">
+            <text class="note-name">{{note.name}}</text>
+            <text class="note-meta" wx:if="{{note.count > 1}}">×{{note.count}}</text>
+            <text class="note-amount">¥{{note.totalText}}</text>
+          </view>
+        </view>
       </view>
     </view>
   </view>
