@@ -91,12 +91,3 @@
     </view>
   </view>
 </view>
-
-<view class="backup-card" bindtap="onExport">
-  <view class="backup-icon">📦</view>
-  <view class="backup-body">
-    <view class="backup-title">导出全部数据</view>
-    <view class="backup-hint">打包笔记/记账/打卡 + 所有图片，存到微信文件传输助手（建议每周一次）</view>
-  </view>
-  <view class="backup-arrow">{{exporting ? '…' : '›'}}</view>
-</view>

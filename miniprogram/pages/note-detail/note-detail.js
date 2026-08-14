@@ -4,6 +4,19 @@ const { dayKey } = require('../../utils/date');
 const { normalizeNote, parseMaterialGroups } = require('../../domain/notes/fields');
 const { LEARN_TAG_ICON } = require('../../domain/notes/categories');
 
+const CATEGORY_LABEL = { 美食: '美食', 美容: '美容', 学习: '学习' };
+
+/** 从 note 里抽出一句话简介（用于分享描述） */
+function buildShareDesc(note) {
+  if (!note) return '生活本';
+  if (note.intro && note.intro.trim()) return note.intro.trim();
+  if (note.summary && note.summary.trim()) return note.summary.trim();
+  if (note.materials) return '材料：' + note.materials.split('\n').slice(0, 2).join(' / ');
+  if (note.steps) return note.steps.split('\n')[0].trim();
+  if (note.body) return note.body.split('\n')[0].trim().slice(0, 60);
+  return CATEGORY_LABEL[note.category] || '生活本';
+}
+
 Page({
   data: {
     id: '',
@@ -147,5 +160,45 @@ Page({
     const current = (this.data.stepItems[idx] || {}).imagePath;
     if (!current) return;
     wx.previewImage({ urls, current });
+  },
+
+  /**
+   * 分享给微信好友：右上角"···" 菜单 / 页面内"分享"按钮都会触发
+   * 分享内容 = 当前 note 详情页，对方点开后跳到 note-detail?id=...
+   */
+  onShareAppMessage() {
+    const note = this.data.note;
+    if (!note) {
+      return {
+        title: '生活本',
+        path: '/pages/food/food',
+      };
+    }
+    const cat = CATEGORY_LABEL[note.category] || '生活本';
+    const titleText = note.title || (cat + '记录');
+    const desc = buildShareDesc(note);
+    return {
+      title: `《${titleText}》· ${desc}`,
+      path: `/pages/note-detail/note-detail?id=${note.id}`,
+    };
+  },
+
+  /**
+   * 分享到朋友圈：当前 note 摘要 + 链接（query 形式，朋友点开跳详情）
+   * 朋友圈分享 imageUrl 必须是可以公网访问的 HTTPS 图（本地路径无效），
+   * 如果没有公网图片，不传 imageUrl，会用页面默认截图，体验略差但可用。
+   */
+  onShareTimeline() {
+    const note = this.data.note;
+    if (!note) {
+      return { title: '生活本', query: '' };
+    }
+    const cat = CATEGORY_LABEL[note.category] || '生活本';
+    const titleText = note.title || (cat + '记录');
+    const desc = buildShareDesc(note);
+    return {
+      title: `《${titleText}》· ${desc}`,
+      query: `id=${note.id}`,
+    };
   },
 });

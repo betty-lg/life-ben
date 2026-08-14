@@ -119,5 +119,6 @@
     <button class="btn ghost" size="mini" bindtap="onDelete">删除</button>
     <button class="btn primary" size="mini" wx:if="{{!hasActive && !hasEnded}}" bindtap="onStart">开启打卡</button>
     <button class="btn primary" size="mini" wx:if="{{hasEnded}}" bindtap="onResume">继续打卡</button>
+    <button class="btn" size="mini" open-type="share">分享</button>
   </view>
 </view>
