@@ -43,12 +43,12 @@ Page({
 
   loadStats() {
     const expenses = repo.getExpenses();
-    if (expenses.length === 0) {
+    const monthItems = filterByPeriod(expenses, 'month', new Date());
+    if (monthItems.length === 0) {
       this.setData({ total: '0.00', stats: [] });
       return;
     }
-
-    const { grandTotal, stats } = buildCategoryStatsWithNotes(expenses);
+    const { grandTotal, stats } = buildCategoryStatsWithNotes(monthItems);
     this.setData({
       total: grandTotal.toFixed(2),
       stats

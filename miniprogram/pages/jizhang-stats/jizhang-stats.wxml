@@ -1,8 +1,8 @@
 <!--pages/stats/stats.wxml-->
 <view class="container">
-  <!-- 总支出 -->
+  <!-- 本月总支出 -->
   <view class="total-card">
-    <text class="total-label">总支出</text>
+    <text class="total-label">本月总支出</text>
     <text class="total-amount">¥{{total}}</text>
   </view>
 
@@ -62,9 +62,9 @@
     </view>
   </view>
 
-  <!-- 分类统计：1 级分类 → 2 级子分类 → 备注 三层 -->
-  <view class="section-title">分类统计</view>
-  <view class="section-hint">点 1 级分类看全部明细；下方按子分类汇总</view>
+  <!-- 本月分类统计：1 级分类 → 2 级子分类 → 备注 三层 -->
+  <view class="section-title">本月分类统计</view>
+  <view class="section-hint">只统计本月，月初重新开始；点 1 级分类看全部明细</view>
 
   <view wx:for="{{stats}}" wx:key="category" class="stat-block">
     <view class="stat-head" bindtap="showCategoryDetail" data-category="{{item.category}}">
