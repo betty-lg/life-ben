@@ -10,8 +10,6 @@ Page({
   },
 
   onShow() {
-    // 清理 30 天前已结束的打卡（直接删除，不展示）
-    repo.pruneOldCheckins(30);
     this.refresh();
   },
 
@@ -114,6 +112,32 @@ Page({
     }
     wx.showToast({ title: '已继续打卡', icon: 'success' });
     this.refresh();
+  },
+
+  onDelete(e) {
+    const id = e.currentTarget.dataset.id;
+    const label = e.currentTarget.dataset.label || '这条打卡';
+    wx.showModal({
+      title: '删除这条打卡？',
+      content: `「${label}」会从打卡列表移除，但笔记内容仍保留在「美食 / 美容 / 学习」里。`,
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#a33b2c',
+      success: (res) => {
+        if (!res.confirm) return;
+        const result = repo.deleteCheckin(id);
+        if (!result.ok) {
+          wx.showToast({ title: '删除失败', icon: 'none' });
+          return;
+        }
+        if (!result.removed) {
+          wx.showToast({ title: '记录已不存在', icon: 'none' });
+        } else {
+          wx.showToast({ title: '已删除', icon: 'success' });
+        }
+        this.refresh();
+      },
+    });
   },
 
   _mutate(id, fn) {
