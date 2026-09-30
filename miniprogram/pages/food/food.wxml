@@ -13,10 +13,7 @@
   </view>
   <view class="search-go {{keyword ? 'on' : ''}}" bindtap="onSearch">搜索</view>
   <view class="add" bindtap="onCreate">+</view>
-  <view class="cal-wrap" bindtap="onOpenCalendar">
-    <view class="cal">📅</view>
-    <view class="cal-badge" wx:if="{{todayDay}}">{{todayDay}}</view>
-  </view>
+  <view class="cal" bindtap="onOpenCalendar">{{todayDay}}</view>
 </view>
 
 <view class="wrap">
