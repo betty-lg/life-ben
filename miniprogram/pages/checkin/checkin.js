@@ -10,6 +10,8 @@ Page({
   },
 
   onShow() {
+    // 清理 30 天前已结束的打卡（直接删除，不展示）
+    repo.pruneOldCheckins(30);
     this.refresh();
   },
 

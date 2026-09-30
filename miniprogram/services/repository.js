@@ -236,6 +236,49 @@ function clearExpenses() {
 }
 
 /**
+ * 清理 N 天前结束的 checkin（直接删除，不是 UI 隐藏）。
+ * - 只删 status === 'ended' 且 endedAt < cutoffKey（日期字符串比较，避开时区抖动）
+ * - active 的不动（用户可能还想续期）
+ * - 顺带清理：未传 endedAt 的已结束记录也视为"孤儿"，一并删
+ * @param {number} daysOld 默认 30
+ * @returns {{ ok: boolean, removed: number, kept: number, error?: any }}
+ */
+function pruneOldCheckins(daysOld = 30) {
+  const today = new Date();
+  const cutoff = new Date(today.getTime() - daysOld * 24 * 60 * 60 * 1000);
+  const cutoffKey =
+    `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}-${String(cutoff.getDate()).padStart(2, '0')}`;
+
+  const doc = load();
+  const before = doc.checkins.length;
+  const kept = [];
+  let removed = 0;
+  for (const c of doc.checkins || []) {
+    if (c.status === 'ended' && c.endedAt) {
+      // ISO 日期字符串可直接字典序比较
+      if (c.endedAt < cutoffKey) {
+        removed += 1;
+        continue;
+      }
+    } else if (c.status === 'ended' && !c.endedAt) {
+      // 孤儿：已结束但没有 endedAt，视为过期删除
+      removed += 1;
+      continue;
+    }
+    kept.push(c);
+  }
+  if (removed === 0) {
+    return { ok: true, removed: 0, kept: before };
+  }
+  doc.checkins = kept;
+  const result = save(doc);
+  if (!result.ok) {
+    return { ok: false, removed: 0, kept: before, error: result.error };
+  }
+  return { ok: true, removed, kept: before - removed };
+}
+
+/**
  * Budgets helpers — each entry is { category: string, budget: number }
  * (budget per category, monthly). Used by jizhang-stats page.
  */
@@ -394,6 +437,7 @@ module.exports = {
   addExpense,
   deleteExpense,
   clearExpenses,
+  pruneOldCheckins,
   getBudgets,
   setBudgets,
   getCategories,
