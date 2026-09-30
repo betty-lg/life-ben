@@ -84,6 +84,30 @@
   box-shadow: 0 6rpx 16rpx rgba(47, 107, 79, 0.25);
 }
 
+/* 日历按钮（包一层让右上角徽章能绝对定位） */
+.cal-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cal-badge {
+  position: absolute;
+  top: -4rpx;
+  right: -4rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  padding: 0 8rpx;
+  background: #e53935;
+  color: #fff;
+  font-size: 18rpx;
+  font-weight: 700;
+  line-height: 28rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  border: 2rpx solid #fff;
+  box-sizing: border-box;
+}
+
 .cal {
   flex-shrink: 0;
   width: 72rpx;

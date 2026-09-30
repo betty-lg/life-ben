@@ -24,9 +24,12 @@ Page({
     activeTag: 'all',
     tags: FOOD_TAGS,
     notes: [],
+    todayDay: '',
   },
 
   onShow() {
+    const d = new Date();
+    this.setData({ todayDay: d.getDate() });
     this.refresh();
   },
 
