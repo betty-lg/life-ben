@@ -47,8 +47,9 @@ Page({
   },
 
   onShow() {
+    // 每次进入都把 selectedDate 重置为今天 — 不然会停留在上次选的日子
     const today = dayKey();
-    if (!this.data.selectedDate) {
+    if (this.data.selectedDate !== today) {
       this.setData({ selectedDate: today });
     }
     this.refresh();
