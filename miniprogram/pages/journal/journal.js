@@ -4,32 +4,52 @@ const { dayKey, parseDayKey, addDays } = require('../../utils/date');
 
 const MEAL_TYPE_LABEL = { 美食: '美食', 美容: '美容', 学习: '学习' };
 
-/** 把 dueDate 翻译成人话: 今天 / 明天 / 后天 / 周X / M月D日 / 过期 N 天 */
+/** 把 dueDate 翻译成人话: 今天 / 明天 / 后天 / 周X / M月D日 / 过期 N 天
+ *  都附上具体日期和星期几,方便一眼看到
+ *  例:
+ *    今天         →  今天 10/16 周五
+ *    明天         →  明天 10/17 周六
+ *    周二(3 天后) →  周二 10/19
+ *    +8 天        →  10/25 周二
+ *    已过 2 天    →  10/14 周二
+ *    跨年         →  2027-01-15 周五
+ */
 function dateLabel(dueDate) {
   if (!dueDate) return '';
   const today = dayKey();
-  if (dueDate === today) return '今天';
+  const wnames = ['日', '一', '二', '三', '四', '五', '六'];
+  const d = parseDayKey(dueDate);
+  const dow = wnames[d.getDay()];
+  const md = (d.getMonth() + 1) + '/' + d.getDate();
+  const ymd = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const full = d.getFullYear() === new Date().getFullYear() ? md : ymd;
+
+  if (dueDate === today) {
+    // 今天 10/16 周五
+    return '今天 ' + full + ' 周' + dow;
+  }
   const tomorrow = addDays(today, 1);
-  if (dueDate === tomorrow) return '明天';
+  if (dueDate === tomorrow) {
+    return '明天 ' + full + ' 周' + dow;
+  }
   const dayAfter = addDays(today, 2);
-  if (dueDate === dayAfter) return '后天';
+  if (dueDate === dayAfter) {
+    return '后天 ' + full + ' 周' + dow;
+  }
 
   const todayMs = parseDayKey(today).getTime();
-  const dueMs = parseDayKey(dueDate).getTime();
+  const dueMs = d.getTime();
   const diffDays = Math.round((dueMs - todayMs) / 86400000);
-  if (diffDays > 0 && diffDays <= 7) {
-    const w = parseDayKey(dueDate).getDay();
-    return '周' + '日一二三四五六'[w];
-  }
   if (diffDays < 0) {
-    return '已过 ' + (-diffDays) + ' 天';
+    // 过期: 已过 N 天 10/14 周二
+    return '已过 ' + (-diffDays) + ' 天 ' + full + ' 周' + dow;
   }
-  // 同年: M月D日; 跨年: YYYY-MM-DD
-  const d = parseDayKey(dueDate);
-  const sameYear = d.getFullYear() === new Date().getFullYear();
-  return sameYear
-    ? (d.getMonth() + 1) + '月' + d.getDate() + '日'
-    : d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  if (diffDays > 0 && diffDays <= 7) {
+    // 1 周内: 周X 10/19
+    return '周' + dow + ' ' + full;
+  }
+  // +8 天及以上: 10/25 周二
+  return full + ' 周' + dow;
 }
 
 function isOverdue(todo) {
