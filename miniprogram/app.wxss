@@ -85,12 +85,38 @@ page {
   min-width: 0;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
 .title {
   display: block;
   font-size: 32rpx;
   font-weight: 650;
   line-height: 1.35;
   color: #1c1c1a;
+}
+
+.streak-badge {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background: #eaf3ee;
+  color: #2f6b4f;
+  border: 1rpx solid #c5ddcf;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.streak-badge.ended {
+  background: #f1f0ec;
+  color: #6b6b66;
+  border-color: #eceae4;
 }
 
 .subline {

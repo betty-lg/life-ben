@@ -5,6 +5,7 @@ const {
   isSameWeek,
   eachDay,
   parseDayKey,
+  addDays,
 } = require('../../utils/date');
 
 function clone(c) {
@@ -67,6 +68,46 @@ function eligibleMakeupDays(checkin, todayKey = dayKey()) {
   if (end < start) return [];
   const done = new Set(checkin.completions || []);
   return eachDay(start, end).filter((k) => !done.has(k));
+}
+
+/**
+ * 当前连续打卡天数(从 today 往前数,今天没打不算断)。
+ * 仅对 streak 类型有意义;weekly 类型返回 0。
+ */
+function currentStreak(checkin, todayKey = dayKey()) {
+  if (!checkin || checkin.goalType !== 'streak') return 0;
+  const set = new Set(checkin.completions || []);
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = addDays(todayKey, -i);
+    if (set.has(d)) {
+      streak += 1;
+    } else if (i === 0) {
+      // 今天还没打,不算断,继续看昨天
+      continue;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+/** 历史最长连续天数(遍历 completions 找最长段)。仅对 streak 类型有意义。 */
+function longestStreak(checkin) {
+  if (!checkin || checkin.goalType !== 'streak') return 0;
+  const days = (checkin.completions || []).slice().sort();
+  if (!days.length) return 0;
+  let max = 1;
+  let cur = 1;
+  for (let i = 1; i < days.length; i++) {
+    if (days[i] === addDays(days[i - 1], 1)) {
+      cur += 1;
+      if (cur > max) max = cur;
+    } else {
+      cur = 1;
+    }
+  }
+  return max;
 }
 
 /**
@@ -178,6 +219,8 @@ module.exports = {
   progressText,
   isPendingToday,
   isTargetMet,
+  currentStreak,
+  longestStreak,
   eligibleMakeupDays,
   recordCompletion,
   renewCycle,

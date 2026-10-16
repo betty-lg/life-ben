@@ -279,19 +279,14 @@
 /* checkin sub-sections */
 .checkin-stats {
   display: flex;
-  align-items: center;
-  gap: 10rpx;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8rpx;
   padding: 16rpx 20rpx;
   margin: 0 0 18rpx;
   background: linear-gradient(135deg, #eaf3ee 0%, #f4f8f5 100%);
   border: 1rpx solid #d4e5dc;
   border-radius: 14rpx;
-}
-
-.stats-pill {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
 }
 
 .stats-label {
@@ -309,12 +304,12 @@
 .stats-unit {
   font-size: 22rpx;
   color: #5f7468;
+  margin-right: 8rpx;
 }
 
-.stats-sep {
-  font-size: 26rpx;
-  color: #c2c0b8;
-  margin: 0 4rpx;
+.stats-hint {
+  font-size: 20rpx;
+  color: #8a8a84;
 }
 
 .sub-section-title {

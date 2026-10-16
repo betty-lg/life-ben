@@ -89,19 +89,12 @@
       <text class="section-title">打卡</text>
     </view>
 
-    <!-- 累计统计条 -->
+    <!-- 累计统计条:仅展示跨事项的总打卡天数,具体连续看每张卡 -->
     <view class="checkin-stats" wx:if="{{active.length || ended.length}}">
-      <view class="stats-pill">
-        <text class="stats-label">累计</text>
-        <text class="stats-num">{{checkinStats.totalDays}}</text>
-        <text class="stats-unit">天</text>
-      </view>
-      <text class="stats-sep">·</text>
-      <view class="stats-pill">
-        <text class="stats-label">连续</text>
-        <text class="stats-num">{{checkinStats.currentStreak}}</text>
-        <text class="stats-unit">天</text>
-      </view>
+      <text class="stats-label">累计打卡</text>
+      <text class="stats-num">{{checkinStats.totalDays}}</text>
+      <text class="stats-unit">天</text>
+      <text class="stats-hint">· 每个事项的连续看卡片</text>
     </view>
 
     <view class="sub-section-title">
@@ -118,7 +111,10 @@
       >
         <view class="card-head">
           <view class="head-main">
-            <text class="title">{{item.label}}</text>
+            <view class="title-row">
+              <text class="title">{{item.label}}</text>
+              <text class="streak-badge" wx:if="{{item.showStreak}}">{{item.streakText}}</text>
+            </view>
             <view class="subline">
               <text>{{item.goalType === 'weekly' ? '周频次' : '连续打卡'}}</text>
               <text wx:if="{{item.longTerm}}" class="dot-sep">·</text>
@@ -156,7 +152,10 @@
       <view class="card ended" wx:for="{{ended}}" wx:key="id" data-note-id="{{item.noteId}}" bindtap="onOpenDetail">
         <view class="card-head">
           <view class="head-main">
-            <text class="title">{{item.label}}</text>
+            <view class="title-row">
+              <text class="title">{{item.label}}</text>
+              <text class="streak-badge ended" wx:if="{{item.showStreak}}">{{item.streakText}}</text>
+            </view>
             <view class="subline">
               <text>上次 {{item.progressText}}</text>
               <text wx:if="{{item.longTerm}}" class="dot-sep">·</text>

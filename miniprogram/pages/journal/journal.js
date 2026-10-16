@@ -75,7 +75,7 @@ Page({
     // checkin (照旧)
     active: [],
     ended: [],
-    checkinStats: { totalDays: 0, currentStreak: 0 },
+    checkinStats: { totalDays: 0 },
   },
 
   onShow() {
@@ -128,6 +128,15 @@ Page({
       const done = engine.progressCount(c, today);
       const pct = Math.min(100, Math.round((done / Math.max(c.target, 1)) * 100));
       const completions = c.completions || [];
+      // 每个事项自己算连续(active 看当前连续;ended 看历史最长)
+      const isStreak = c.goalType === 'streak';
+      const cur = isStreak ? engine.currentStreak(c, today) : 0;
+      const longest = isStreak ? engine.longestStreak(c) : 0;
+      const streakText = !isStreak
+        ? ''
+        : (c.status === 'ended'
+          ? '曾连续 ' + longest + ' 天'
+          : (cur > 0 ? '连续 ' + cur + ' 天' : '今日还没打卡'));
       return {
         ...c,
         doneCount: done,
@@ -137,31 +146,16 @@ Page({
         pct,
         recent: completions.slice(-3).join('、'),
         recentLast: completions.length ? completions[completions.length - 1] : '',
+        showStreak: isStreak,
+        streakText,
       };
     };
 
-    // 累计打卡天数(所有 checkin 的 completions 合并去重)
+    // 累计打卡天数(所有 checkin 的 completions 合并去重)—— 跨事项的总和
     const allDays = new Set();
     list.forEach((c) => (c.completions || []).forEach((d) => allDays.add(d)));
-    // 当前连续打卡天数: 从今天往前数,只要有 active checkin 标记那天有完成
-    // 简化: 用所有 active 的 completions 求并集,再从今天往前数
-    const activeDays = new Set();
-    activeCheckins.forEach((c) => (c.completions || []).forEach((d) => activeDays.add(d)));
-    let streak = 0;
-    for (let i = 0; i < 365; i++) {
-      const d = addDays(today, -i);
-      if (activeDays.has(d)) {
-        streak += 1;
-      } else if (i === 0) {
-        // 今天还没打卡,不算断,继续看昨天
-        continue;
-      } else {
-        break;
-      }
-    }
     const checkinStats = {
       totalDays: allDays.size,
-      currentStreak: streak,
     };
 
     this.setData({
