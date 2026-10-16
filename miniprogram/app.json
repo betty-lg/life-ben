@@ -1,6 +1,6 @@
 {
   "pages": [
-    "pages/checkin/checkin",
+    "pages/journal/journal",
     "pages/food/food",
     "pages/beauty/beauty",
     "pages/learn/learn",
@@ -26,8 +26,8 @@
     "borderStyle": "black",
     "list": [
       {
-        "pagePath": "pages/checkin/checkin",
-        "text": "打卡",
+        "pagePath": "pages/journal/journal",
+        "text": "记录",
         "iconPath": "assets/tab/checkin.png",
         "selectedIconPath": "assets/tab/checkin-active.png"
       },

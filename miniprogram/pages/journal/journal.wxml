@@ -1,0 +1,216 @@
+<view class="page">
+  <view class="hint">数据保存在本机。完成、记一下、点金点子，把生活留下来。</view>
+
+  <!-- ============ TODO ============ -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">待办</text>
+      <text class="section-count" wx:if="{{activeTodos.length}}">{{activeTodos.length}} 项</text>
+      <view class="section-add" bindtap="onOpenAddTodo">+</view>
+    </view>
+
+    <block wx:if="{{activeTodos.length}}">
+      <view class="todo-list">
+        <view
+          class="todo-item {{item.overdue ? 'overdue' : ''}}"
+          wx:for="{{activeTodos}}"
+          wx:key="id"
+        >
+          <view class="todo-check" data-id="{{item.id}}" bindtap="onToggleTodo">
+            <view class="todo-check-box"></view>
+          </view>
+          <view class="todo-body" data-id="{{item.id}}" bindtap="onToggleTodo">
+            <view class="todo-text">{{item.text}}</view>
+            <view class="todo-meta" wx:if="{{item.dueLabel}}">
+              <text class="todo-date">{{item.dueLabel}}</text>
+            </view>
+          </view>
+          <view class="todo-del" data-id="{{item.id}}" bindtap="onDeleteTodo">✕</view>
+        </view>
+      </view>
+    </block>
+    <view class="empty" wx:else>暂无待办，点右上 + 加一个</view>
+
+    <!-- 已完成折叠 -->
+    <view class="done-fold" wx:if="{{doneTodos.length}}" bindtap="onToggleDoneFold">
+      <text class="done-fold-line"></text>
+      <text class="done-fold-text">{{doneCollapsed ? '展开' : '收起'}}已完成 {{doneTodos.length}} 项</text>
+      <text class="done-fold-line"></text>
+    </view>
+    <view class="todo-list" wx:if="{{!doneCollapsed && doneTodos.length}}">
+      <view
+        class="todo-item done"
+        wx:for="{{doneTodos}}"
+        wx:key="id"
+      >
+        <view class="todo-check" data-id="{{item.id}}" bindtap="onToggleTodo">
+          <view class="todo-check-box checked">✓</view>
+        </view>
+        <view class="todo-body" data-id="{{item.id}}" bindtap="onToggleTodo">
+          <view class="todo-text">{{item.text}}</view>
+          <view class="todo-meta" wx:if="{{item.dueLabel}}">
+            <text class="todo-date">{{item.dueLabel}}</text>
+          </view>
+        </view>
+        <view class="todo-del" data-id="{{item.id}}" bindtap="onDeleteTodo">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ============ IDEAS ============ -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">金点子</text>
+      <text class="section-count" wx:if="{{ideas.length}}">{{ideas.length}} 条</text>
+      <view class="section-add" bindtap="onOpenAddIdea">+</view>
+    </view>
+
+    <block wx:if="{{ideas.length}}">
+      <view class="idea-list">
+        <view class="idea-item" wx:for="{{ideas}}" wx:key="id">
+          <view class="idea-bulb">💡</view>
+          <view class="idea-body">
+            <view class="idea-text">{{item.text}}</view>
+            <view class="idea-time">{{item.timeLabel}}</view>
+          </view>
+          <view class="idea-del" data-id="{{item.id}}" bindtap="onDeleteIdea">✕</view>
+        </view>
+      </view>
+    </block>
+    <view class="empty" wx:else>把一闪而过的想法记下来</view>
+  </view>
+
+  <!-- ============ CHECKIN ============ -->
+  <view class="section checkin-section">
+    <view class="section-head">
+      <text class="section-title">打卡</text>
+    </view>
+
+    <view class="sub-section-title">
+      <text>进行中</text>
+      <text class="sub-section-count">{{active.length}}</text>
+    </view>
+    <block wx:if="{{active.length}}">
+      <view
+        class="card {{item.pending ? 'pending' : ''}} {{item.todayDone ? 'done-today' : ''}}"
+        wx:for="{{active}}"
+        wx:key="id"
+        data-note-id="{{item.noteId}}"
+        bindtap="onOpenDetail"
+      >
+        <view class="card-head">
+          <view class="head-main">
+            <text class="title">{{item.label}}</text>
+            <view class="subline">
+              <text>{{item.goalType === 'weekly' ? '周频次' : '连续打卡'}}</text>
+              <text wx:if="{{item.longTerm}}" class="dot-sep">·</text>
+              <text wx:if="{{item.longTerm}}">长期</text>
+            </view>
+          </view>
+          <view class="status {{item.todayDone ? 'is-done' : (item.pending ? 'is-pending' : 'is-idle')}}">
+            <view class="status-dot"></view>
+            <text>{{item.todayDone ? '今日已打' : (item.pending ? '待打卡' : '进行中')}}</text>
+          </view>
+          <view class="card-del" data-id="{{item.id}}" data-label="{{item.label}}" catchtap="onDeleteCheckin">✕</view>
+        </view>
+        <view class="progress-row">
+          <text class="progress-num"><text class="num-strong">{{item.doneCount}}</text><text class="num-muted"> / {{item.target}}</text></text>
+          <text class="progress-hint" wx:if="{{item.recent}}">最近 {{item.recentLast}}</text>
+        </view>
+        <view class="progress"><view class="progress-bar" style="width: {{item.pct}}%;"></view></view>
+        <view class="actions" catchtap="noop">
+          <button class="btn primary" size="mini" data-id="{{item.id}}" catchtap="onComplete" disabled="{{item.todayDone}}">今日打卡</button>
+          <button class="btn" size="mini" data-id="{{item.id}}" catchtap="onMakeup">补卡</button>
+          <button class="btn ghost" size="mini" data-id="{{item.id}}" catchtap="onStop">结束</button>
+        </view>
+      </view>
+    </block>
+    <view class="empty" wx:else>
+      <view>暂无进行中</view>
+      <view>去「美食 / 美容 / 学习」看内容，详情页可开启打卡</view>
+    </view>
+
+    <view class="sub-section-title ended-sub">
+      <text>已结束</text>
+      <text class="sub-section-count">{{ended.length}}</text>
+    </view>
+    <block wx:if="{{ended.length}}">
+      <view class="card ended" wx:for="{{ended}}" wx:key="id" data-note-id="{{item.noteId}}" bindtap="onOpenDetail">
+        <view class="card-head">
+          <view class="head-main">
+            <text class="title">{{item.label}}</text>
+            <view class="subline">
+              <text>上次 {{item.progressText}}</text>
+              <text wx:if="{{item.longTerm}}" class="dot-sep">·</text>
+              <text wx:if="{{item.longTerm}}">曾长期</text>
+            </view>
+          </view>
+          <view class="status is-ended">
+            <view class="status-dot"></view>
+            <text>已结束</text>
+          </view>
+          <view class="card-del" data-id="{{item.id}}" data-label="{{item.label}}" catchtap="onDeleteCheckin">✕</view>
+        </view>
+        <view class="actions" catchtap="noop">
+          <button class="btn primary" size="mini" data-id="{{item.id}}" catchtap="onResume">继续打卡</button>
+          <button class="btn ghost danger" size="mini" data-id="{{item.id}}" data-label="{{item.label}}" catchtap="onDeleteCheckin">删除</button>
+        </view>
+      </view>
+    </block>
+    <view class="meta quiet" wx:else>还没有已结束的打卡</view>
+  </view>
+</view>
+
+<!-- ============ TODO 添加弹层 ============ -->
+<view class="modal-mask" wx:if="{{addTodoOpen}}" bindtap="onCloseAddTodo">
+  <view class="modal-card" catchtap="noop">
+    <view class="modal-title">加个待办</view>
+    <textarea
+      class="modal-input"
+      placeholder="要做的事..."
+      value="{{addTodoText}}"
+      bindinput="onTodoTextInput"
+      auto-height
+      maxlength="200"
+    />
+    <view class="modal-sub">什么时候做</view>
+    <view class="quick-row">
+      <view class="quick-chip {{addTodoDate === today ? 'on' : ''}}" data-tag="today" bindtap="onQuickTodoDate">今天</view>
+      <view class="quick-chip {{addTodoDate === '' ? 'on' : ''}}" data-tag="none" bindtap="onQuickTodoDate">不限</view>
+    </view>
+    <view class="quick-row">
+      <view class="quick-chip" data-tag="tomorrow" bindtap="onQuickTodoDate">明天</view>
+      <view class="quick-chip" data-tag="dayAfter" bindtap="onQuickTodoDate">后天</view>
+    </view>
+    <view class="modal-sub">或选具体日期</view>
+    <picker mode="date" value="{{addTodoDate}}" start="{{today}}" end="2027-12-31" bindchange="onTodoDateChange">
+      <view class="picker-row">
+        <text class="picker-label">{{addTodoDate || '点这里选日期'}}</text>
+        <text class="picker-arrow">›</text>
+      </view>
+    </picker>
+    <view class="modal-actions">
+      <button class="modal-btn cancel" size="mini" bindtap="onCloseAddTodo">取消</button>
+      <button class="modal-btn ok" size="mini" bindtap="onConfirmAddTodo">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- ============ IDEA 添加弹层 ============ -->
+<view class="modal-mask" wx:if="{{addIdeaOpen}}" bindtap="onCloseAddIdea">
+  <view class="modal-card" catchtap="noop">
+    <view class="modal-title">记个金点子</view>
+    <textarea
+      class="modal-input"
+      placeholder="刚才想到的..."
+      value="{{addIdeaText}}"
+      bindinput="onIdeaTextInput"
+      auto-height
+      maxlength="500"
+    />
+    <view class="modal-actions">
+      <button class="modal-btn cancel" size="mini" bindtap="onCloseAddIdea">取消</button>
+      <button class="modal-btn ok" size="mini" bindtap="onConfirmAddIdea">保存</button>
+    </view>
+  </view>
+</view>

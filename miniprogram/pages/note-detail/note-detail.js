@@ -98,7 +98,7 @@ Page({
   },
 
   onCheckinIcon() {
-    wx.switchTab({ url: '/pages/checkin/checkin' });
+    wx.switchTab({ url: '/pages/journal/journal' });
   },
 
   onStart() {
@@ -122,7 +122,7 @@ Page({
       return;
     }
     wx.showToast({ title: '已继续打卡', icon: 'success' });
-    wx.switchTab({ url: '/pages/checkin/checkin' });
+    wx.switchTab({ url: '/pages/journal/journal' });
   },
 
   onEdit() {

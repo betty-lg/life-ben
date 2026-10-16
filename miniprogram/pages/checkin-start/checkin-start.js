@@ -82,7 +82,7 @@ Page({
     }
     wx.showToast({ title: '已开启打卡', icon: 'success' });
     setTimeout(() => {
-      wx.switchTab({ url: '/pages/checkin/checkin' });
+      wx.switchTab({ url: '/pages/journal/journal' });
     }, 400);
   },
 });

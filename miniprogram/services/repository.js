@@ -4,7 +4,7 @@ const MEAL_TYPES = ['breakfast', 'lunch', 'dinner'];
 const MEAL_TYPE_LABEL = { breakfast: '早餐', lunch: '中餐', dinner: '晚餐' };
 
 function emptyDoc() {
-  return { version: VERSION, notes: [], checkins: [] };
+  return { version: VERSION, notes: [], checkins: [], todos: [], ideas: [] };
 }
 
 function load() {
@@ -18,6 +18,8 @@ function load() {
       expenses: Array.isArray(raw.expenses) ? raw.expenses : [],
       categories: Array.isArray(raw.categories) ? raw.categories : [],
       budgets: Array.isArray(raw.budgets) ? raw.budgets : [],
+      todos: Array.isArray(raw.todos) ? raw.todos : [],
+      ideas: Array.isArray(raw.ideas) ? raw.ideas : [],
     };
   } catch (e) {
     return emptyDoc();
@@ -32,6 +34,8 @@ function save(doc) {
     expenses: doc.expenses || [],
     categories: doc.categories || [],
     budgets: doc.budgets || [],
+    todos: doc.todos || [],
+    ideas: doc.ideas || [],
   };
   try {
     wx.setStorageSync(STORAGE_KEY, payload);
@@ -255,6 +259,105 @@ function deleteCheckin(id) {
 }
 
 /**
+ * Todos helpers
+ *   todo: { id, text, dueDate: 'YYYY-MM-DD' 或 '', done, doneAt, createdAt, updatedAt }
+ *   - dueDate 为空表示没有截止日期,排在最末尾
+ *   - 排序: 过期 > 今天 > 明天 > ... > 无日期
+ *   - 已完成单独放最底
+ */
+
+function getTodos() {
+  return load().todos || [];
+}
+
+function getActiveTodos() {
+  return getTodos().filter((t) => !t.done);
+}
+
+function addTodo({ text, dueDate }) {
+  const doc = load();
+  const now = Date.now();
+  const todo = {
+    id: uid('todo'),
+    text: (text || '').trim(),
+    dueDate: (dueDate || '').trim(),
+    done: false,
+    doneAt: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+  if (!todo.text) return { ok: false, error: '内容不能为空' };
+  doc.todos = doc.todos || [];
+  doc.todos.push(todo);
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, todo };
+}
+
+function updateTodo(id, patch) {
+  const doc = load();
+  const list = doc.todos || [];
+  const idx = list.findIndex((t) => t.id === id);
+  if (idx < 0) return { ok: false, error: 'todo 不存在' };
+  const next = { ...list[idx], ...patch, id, updatedAt: Date.now() };
+  if (patch.done === true) next.doneAt = Date.now();
+  if (patch.done === false) next.doneAt = null;
+  list[idx] = next;
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, todo: next };
+}
+
+function deleteTodo(id) {
+  const doc = load();
+  const before = (doc.todos || []).length;
+  doc.todos = (doc.todos || []).filter((t) => t.id !== id);
+  if (doc.todos.length === before) {
+    return { ok: true, removed: false };
+  }
+  const result = save(doc);
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true, removed: true };
+}
+
+/**
+ * Ideas (金点子) helpers
+ *   idea: { id, text, createdAt }
+ */
+
+function getIdeas() {
+  return load().ideas || [];
+}
+
+function addIdea({ text }) {
+  const doc = load();
+  const now = Date.now();
+  const idea = {
+    id: uid('idea'),
+    text: (text || '').trim(),
+    createdAt: now,
+  };
+  if (!idea.text) return { ok: false, error: '内容不能为空' };
+  doc.ideas = doc.ideas || [];
+  doc.ideas.push(idea);
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, idea };
+}
+
+function deleteIdea(id) {
+  const doc = load();
+  const before = (doc.ideas || []).length;
+  doc.ideas = (doc.ideas || []).filter((i) => i.id !== id);
+  if (doc.ideas.length === before) {
+    return { ok: true, removed: false };
+  }
+  const result = save(doc);
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true, removed: true };
+}
+
+/**
  * Budgets helpers — each entry is { category: string, budget: number }
  * (budget per category, monthly). Used by jizhang-stats page.
  */
@@ -414,6 +517,14 @@ module.exports = {
   deleteExpense,
   clearExpenses,
   deleteCheckin,
+  getTodos,
+  getActiveTodos,
+  addTodo,
+  updateTodo,
+  deleteTodo,
+  getIdeas,
+  addIdea,
+  deleteIdea,
   getBudgets,
   setBudgets,
   getCategories,
