@@ -71,9 +71,11 @@ Page({
     addTodoDate: '',
     addIdeaOpen: false,
     addIdeaText: '',
+    editingIdeaId: '',
     // checkin (照旧)
     active: [],
     ended: [],
+    checkinStats: { totalDays: 0, currentStreak: 0 },
   },
 
   onShow() {
@@ -138,6 +140,30 @@ Page({
       };
     };
 
+    // 累计打卡天数(所有 checkin 的 completions 合并去重)
+    const allDays = new Set();
+    list.forEach((c) => (c.completions || []).forEach((d) => allDays.add(d)));
+    // 当前连续打卡天数: 从今天往前数,只要有 active checkin 标记那天有完成
+    // 简化: 用所有 active 的 completions 求并集,再从今天往前数
+    const activeDays = new Set();
+    activeCheckins.forEach((c) => (c.completions || []).forEach((d) => activeDays.add(d)));
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = addDays(today, -i);
+      if (activeDays.has(d)) {
+        streak += 1;
+      } else if (i === 0) {
+        // 今天还没打卡,不算断,继续看昨天
+        continue;
+      } else {
+        break;
+      }
+    }
+    const checkinStats = {
+      totalDays: allDays.size,
+      currentStreak: streak,
+    };
+
     this.setData({
       today,
       todos: allTodos,
@@ -146,6 +172,7 @@ Page({
       ideas,
       active: activeCheckins.map(decorate),
       ended: endedCheckins.map(decorate),
+      checkinStats,
     });
   },
 
@@ -214,10 +241,20 @@ Page({
 
   // ====== IDEAS ======
   onOpenAddIdea() {
-    this.setData({ addIdeaOpen: true, addIdeaText: '' });
+    this.setData({ addIdeaOpen: true, addIdeaText: '', editingIdeaId: '' });
   },
   onCloseAddIdea() {
-    this.setData({ addIdeaOpen: false });
+    this.setData({ addIdeaOpen: false, editingIdeaId: '' });
+  },
+  onEditIdea(e) {
+    const id = e.currentTarget.dataset.id;
+    const idea = this.data.ideas.find((x) => x.id === id);
+    if (!idea) return;
+    this.setData({
+      addIdeaOpen: true,
+      addIdeaText: idea.text,
+      editingIdeaId: id,
+    });
   },
   onIdeaTextInput(e) {
     this.setData({ addIdeaText: e.detail.value || '' });
@@ -228,12 +265,16 @@ Page({
       wx.showToast({ title: '请输入内容', icon: 'none' });
       return;
     }
-    const result = repo.addIdea({ text });
+    const editId = this.data.editingIdeaId;
+    const result = editId
+      ? repo.updateIdea(editId, { text })
+      : repo.addIdea({ text });
     if (!result.ok) {
-      wx.showToast({ title: result.error || '添加失败', icon: 'none' });
+      wx.showToast({ title: result.error || '保存失败', icon: 'none' });
       return;
     }
-    this.setData({ addIdeaOpen: false, addIdeaText: '' });
+    this.setData({ addIdeaOpen: false, addIdeaText: '', editingIdeaId: '' });
+    wx.showToast({ title: editId ? '已更新' : '已保存', icon: 'success' });
     this.refresh();
   },
   onDeleteIdea(e) {

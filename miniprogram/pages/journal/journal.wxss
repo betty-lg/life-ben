@@ -247,6 +247,27 @@
   color: #a33b2c;
 }
 
+.idea-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0rpx;
+}
+
+.idea-edit {
+  flex-shrink: 0;
+  width: 48rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  text-align: center;
+  color: #c2c0b8;
+  font-size: 26rpx;
+}
+
+.idea-edit:active {
+  color: #2f6b4f;
+}
+
 .empty {
   padding: 24rpx 0;
   text-align: center;
@@ -256,6 +277,46 @@
 }
 
 /* checkin sub-sections */
+.checkin-stats {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 16rpx 20rpx;
+  margin: 0 0 18rpx;
+  background: linear-gradient(135deg, #eaf3ee 0%, #f4f8f5 100%);
+  border: 1rpx solid #d4e5dc;
+  border-radius: 14rpx;
+}
+
+.stats-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #5f7468;
+}
+
+.stats-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #2f6b4f;
+  line-height: 1;
+}
+
+.stats-unit {
+  font-size: 22rpx;
+  color: #5f7468;
+}
+
+.stats-sep {
+  font-size: 26rpx;
+  color: #c2c0b8;
+  margin: 0 4rpx;
+}
+
 .sub-section-title {
   display: flex;
   align-items: center;

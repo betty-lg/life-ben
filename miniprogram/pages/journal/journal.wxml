@@ -73,7 +73,10 @@
             <view class="idea-text">{{item.text}}</view>
             <view class="idea-time">{{item.timeLabel}}</view>
           </view>
-          <view class="idea-del" data-id="{{item.id}}" bindtap="onDeleteIdea">✕</view>
+          <view class="idea-actions">
+            <view class="idea-edit" data-id="{{item.id}}" bindtap="onEditIdea">✏️</view>
+            <view class="idea-del" data-id="{{item.id}}" bindtap="onDeleteIdea">✕</view>
+          </view>
         </view>
       </view>
     </block>
@@ -84,6 +87,21 @@
   <view class="section checkin-section">
     <view class="section-head">
       <text class="section-title">打卡</text>
+    </view>
+
+    <!-- 累计统计条 -->
+    <view class="checkin-stats" wx:if="{{active.length || ended.length}}">
+      <view class="stats-pill">
+        <text class="stats-label">累计</text>
+        <text class="stats-num">{{checkinStats.totalDays}}</text>
+        <text class="stats-unit">天</text>
+      </view>
+      <text class="stats-sep">·</text>
+      <view class="stats-pill">
+        <text class="stats-label">连续</text>
+        <text class="stats-num">{{checkinStats.currentStreak}}</text>
+        <text class="stats-unit">天</text>
+      </view>
     </view>
 
     <view class="sub-section-title">
@@ -199,7 +217,7 @@
 <!-- ============ IDEA 添加弹层 ============ -->
 <view class="modal-mask" wx:if="{{addIdeaOpen}}" bindtap="onCloseAddIdea">
   <view class="modal-card" catchtap="noop">
-    <view class="modal-title">记个金点子</view>
+    <view class="modal-title">{{editingIdeaId ? '改个金点子' : '记个金点子'}}</view>
     <textarea
       class="modal-input"
       placeholder="刚才想到的..."

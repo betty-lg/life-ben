@@ -357,6 +357,19 @@ function deleteIdea(id) {
   return { ok: true, removed: true };
 }
 
+function updateIdea(id, patch) {
+  const doc = load();
+  const list = doc.ideas || [];
+  const idx = list.findIndex((i) => i.id === id);
+  if (idx < 0) return { ok: false, error: '想法不存在' };
+  const text = (patch && patch.text != null ? String(patch.text) : list[idx].text).trim();
+  if (!text) return { ok: false, error: '内容不能为空' };
+  list[idx] = { ...list[idx], text, updatedAt: Date.now() };
+  const result = save(doc);
+  if (!result.ok) return result;
+  return { ok: true, idea: list[idx] };
+}
+
 /**
  * Budgets helpers — each entry is { category: string, budget: number }
  * (budget per category, monthly). Used by jizhang-stats page.
@@ -525,6 +538,7 @@ module.exports = {
   getIdeas,
   addIdea,
   deleteIdea,
+  updateIdea,
   getBudgets,
   setBudgets,
   getCategories,
