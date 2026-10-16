@@ -59,6 +59,38 @@ function eachDay(startKey, endKey) {
   return out;
 }
 
+/**
+ * 把 YYYY-MM-DD 格式化成短日期。
+ * 同年显示 M/D,跨年显示 YYYY/M/D。
+ * 失败返回 ''.
+ */
+function formatMd(key, refDate = new Date()) {
+  if (!key) return '';
+  const parts = String(key).split('-');
+  if (parts.length !== 3) return '';
+  const y = Number(parts[0]);
+  const m = Number(parts[1]);
+  const d = Number(parts[2]);
+  if (!y || !m || !d) return '';
+  const refYear = refDate.getFullYear();
+  if (y === refYear) return m + '/' + d;
+  return y + '/' + m + '/' + d;
+}
+
+/** 同年「M月D日」，跨年「Y年M月D日」。 */
+function formatCnMd(key, refDate = new Date()) {
+  if (!key) return '';
+  const parts = String(key).split('-');
+  if (parts.length !== 3) return '';
+  const y = Number(parts[0]);
+  const m = Number(parts[1]);
+  const d = Number(parts[2]);
+  if (!y || !m || !d) return '';
+  const refYear = refDate.getFullYear();
+  if (y === refYear) return m + '月' + d + '日';
+  return y + '年' + m + '月' + d + '日';
+}
+
 module.exports = {
   dayKey,
   startOfWeek,
@@ -67,4 +99,6 @@ module.exports = {
   isSameWeek,
   addDays,
   eachDay,
+  formatMd,
+  formatCnMd,
 };

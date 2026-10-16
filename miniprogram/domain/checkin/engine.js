@@ -6,13 +6,24 @@ const {
   eachDay,
   parseDayKey,
   addDays,
+  formatCnMd,
 } = require('../../utils/date');
 
 function clone(c) {
   return {
     ...c,
     completions: [...(c.completions || [])],
+    archivedCompletions: [...(c.archivedCompletions || [])],
   };
+}
+
+function collectDays(checkin, into) {
+  (checkin.completions || []).forEach((d) => {
+    if (d) into.add(d);
+  });
+  (checkin.archivedCompletions || []).forEach((d) => {
+    if (d) into.add(d);
+  });
 }
 
 function progressCount(checkin, todayKey = dayKey()) {
@@ -111,6 +122,40 @@ function longestStreak(checkin) {
 }
 
 /**
+ * 按 noteId 汇总该事项全部打卡日(进行中、已结束、续期归档,去重)。
+ * 连续天数和周频次都算,每个事项单独一条。
+ * @returns {Map<string, { startDate: string|null, totalDays: number }>}
+ */
+function summarizeByNote(checkins) {
+  const map = new Map();
+  (checkins || []).forEach((c) => {
+    if (!c || !c.noteId) return;
+    if (!map.has(c.noteId)) {
+      map.set(c.noteId, { days: new Set() });
+    }
+    collectDays(c, map.get(c.noteId).days);
+  });
+  const out = new Map();
+  map.forEach((entry, noteId) => {
+    if (!entry.days.size) {
+      out.set(noteId, { startDate: null, totalDays: 0 });
+    } else {
+      const sorted = Array.from(entry.days).sort();
+      out.set(noteId, { startDate: sorted[0], totalDays: entry.days.size });
+    }
+  });
+  return out;
+}
+
+/** 「从10月16日开始，累计打卡5天」。没有打卡记录时返回空字符串。 */
+function cumulativeText(entry, refDate = new Date()) {
+  if (!entry || !entry.totalDays || !entry.startDate) return '';
+  const label = formatCnMd(entry.startDate, refDate);
+  if (!label) return '';
+  return '从' + label + '开始，累计打卡' + entry.totalDays + '天';
+}
+
+/**
  * @returns {{ checkin: object, signal: string, message?: string }}
  */
 function recordCompletion(checkin, day = dayKey()) {
@@ -145,6 +190,11 @@ function recordCompletion(checkin, day = dayKey()) {
 
 function renewCycle(checkin, todayKey = dayKey()) {
   const c = clone(checkin);
+  const archived = new Set(c.archivedCompletions || []);
+  (c.completions || []).forEach((d) => {
+    if (d) archived.add(d);
+  });
+  c.archivedCompletions = Array.from(archived).sort();
   c.completions = [];
   c.cycleStart = todayKey;
   c.status = 'active';
@@ -166,16 +216,33 @@ function stopCheckin(checkin, todayKey = dayKey()) {
 function resumeCheckin(endedCheckin, todayKey = dayKey(), overrides = {}) {
   const base = endedCheckin;
   return {
-    id: overrides.id || `c_${Date.now()}`,
+    id: overrides.id || base.id,
     noteId: base.noteId,
     label: base.label,
     goalType: overrides.goalType || base.goalType,
     target: overrides.target != null ? overrides.target : base.target,
     longTerm: overrides.longTerm != null ? overrides.longTerm : base.longTerm,
     status: 'active',
-    completions: [],
-    cycleStart: todayKey,
+    completions: [...(base.completions || [])],
+    archivedCompletions: [...(base.archivedCompletions || [])],
+    cycleStart: base.cycleStart || todayKey,
   };
+}
+
+/**
+ * 旧的「继续打卡」会把未完成的天数挪进归档并清零。
+ * 本周期还没达标时，把这些天数放回当前进度。
+ */
+function restoreUnfinishedCycle(checkin) {
+  const c = clone(checkin);
+  const completions = [...(c.completions || [])];
+  const archived = [...(c.archivedCompletions || [])].filter(Boolean);
+  if (completions.length > 0 || !archived.length) return c;
+  if (archived.length >= Number(c.target)) return c;
+  c.completions = Array.from(new Set(archived)).sort();
+  c.archivedCompletions = [];
+  if (!c.cycleStart || c.cycleStart > c.completions[0]) c.cycleStart = c.completions[0];
+  return c;
 }
 
 function createCheckin({
@@ -221,12 +288,15 @@ module.exports = {
   isTargetMet,
   currentStreak,
   longestStreak,
+  summarizeByNote,
+  cumulativeText,
   eligibleMakeupDays,
   recordCompletion,
   renewCycle,
   applyContinue,
   stopCheckin,
   resumeCheckin,
+  restoreUnfinishedCycle,
   createCheckin,
   partitionByStatus,
   hasActiveForNote,

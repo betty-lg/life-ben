@@ -13,6 +13,7 @@
  * @property {boolean} longTerm
  * @property {CheckinStatus} status
  * @property {string[]} completions  day keys YYYY-MM-DD in current cycle
+ * @property {string[]} [archivedCompletions]  prior cycles, kept for cumulative count
  * @property {string} cycleStart  day key when current cycle began
  * @property {string} [endedAt]
  */

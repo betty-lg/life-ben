@@ -277,41 +277,6 @@
 }
 
 /* checkin sub-sections */
-.checkin-stats {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8rpx;
-  padding: 16rpx 20rpx;
-  margin: 0 0 18rpx;
-  background: linear-gradient(135deg, #eaf3ee 0%, #f4f8f5 100%);
-  border: 1rpx solid #d4e5dc;
-  border-radius: 14rpx;
-}
-
-.stats-label {
-  font-size: 24rpx;
-  color: #5f7468;
-}
-
-.stats-num {
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #2f6b4f;
-  line-height: 1;
-}
-
-.stats-unit {
-  font-size: 22rpx;
-  color: #5f7468;
-  margin-right: 8rpx;
-}
-
-.stats-hint {
-  font-size: 20rpx;
-  color: #8a8a84;
-}
-
 .sub-section-title {
   display: flex;
   align-items: center;
@@ -450,6 +415,18 @@
   height: 100%;
   background: #2f6b4f;
   border-radius: 999rpx;
+}
+
+.summary-line {
+  margin-top: 14rpx;
+  padding: 10rpx 14rpx;
+  background: #f4f8f5;
+  border: 1rpx solid #d4e5dc;
+  border-radius: 10rpx;
+  font-size: 22rpx;
+  color: #2a5c42;
+  line-height: 1.5;
+  word-break: break-all;
 }
 
 .actions {

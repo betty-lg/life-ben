@@ -75,6 +75,43 @@ describe('checkin engine', () => {
     assert.equal(r.checkin.status, 'active');
   });
 
+  it('resume after today check-in keeps 1/14', () => {
+    const ended = engine.stopCheckin(
+      base({
+        id: 'c-today',
+        completions: ['2026-10-16'],
+        cycleStart: '2026-10-01',
+        target: 14,
+      }),
+      '2026-10-16'
+    );
+    const next = engine.resumeCheckin(ended, '2026-10-16');
+    assert.equal(next.id, 'c-today');
+    assert.equal(next.status, 'active');
+    assert.equal(engine.progressCount(next, '2026-10-16'), 1);
+    assert.equal(engine.progressText(next, '2026-10-16'), '1 / 14');
+    assert.equal(ended.status, 'ended');
+  });
+
+  it('restore unfinished cycle parked by an older resume', () => {
+    const parked = base({
+      status: 'active',
+      completions: [],
+      archivedCompletions: ['2026-10-16'],
+      cycleStart: '2026-10-16',
+      target: 14,
+    });
+    const fixed = engine.restoreUnfinishedCycle(parked);
+    assert.equal(engine.progressCount(fixed, '2026-10-16'), 1);
+    assert.deepEqual(fixed.archivedCompletions, []);
+    const finished = base({
+      completions: [],
+      archivedCompletions: Array.from({ length: 14 }, (_, i) => `2026-07-${String(i + 1).padStart(2, '0')}`),
+      target: 14,
+    });
+    assert.equal(engine.restoreUnfinishedCycle(finished).completions.length, 0);
+  });
+
   it('AE6: resume ended → new active; ended retained by caller', () => {
     const ended = engine.stopCheckin(
       base({ label: '美容·面膜', noteId: 'n3', goalType: 'weekly', target: 2, longTerm: true }),
@@ -123,6 +160,81 @@ describe('checkin engine', () => {
     const { active, ended } = engine.partitionByStatus(list);
     assert.equal(active.length, 1);
     assert.equal(ended.length, 1);
+  });
+
+  it('stop then resume keeps cumulative days per note', () => {
+    const maskEnded = engine.stopCheckin(
+      base({
+        id: 'mask-old',
+        noteId: 'mask',
+        label: '美容·面膜',
+        goalType: 'continuous',
+        target: 14,
+        completions: ['2026-08-01', '2026-08-02', '2026-08-03'],
+      }),
+      '2026-08-04'
+    );
+    const maskNext = engine.resumeCheckin(maskEnded, '2026-08-10', { id: 'mask-new' });
+    maskNext.completions = ['2026-08-10', '2026-08-11'];
+
+    const soup = base({
+      id: 'soup',
+      noteId: 'soup',
+      label: '美食·五红汤',
+      goalType: 'continuous',
+      target: 14,
+      completions: ['2026-07-02', '2026-07-03'],
+    });
+
+    const summary = engine.summarizeByNote([maskEnded, maskNext, soup]);
+    const mask = summary.get('mask');
+    const soupSum = summary.get('soup');
+    assert.equal(mask.startDate, '2026-08-01');
+    assert.equal(mask.totalDays, 5);
+    assert.equal(soupSum.startDate, '2026-07-02');
+    assert.equal(soupSum.totalDays, 2);
+    assert.equal(
+      engine.cumulativeText(mask, new Date(2026, 9, 16)),
+      '从8月1日开始，累计打卡5天'
+    );
+    assert.equal(
+      engine.cumulativeText(soupSum, new Date(2026, 9, 16)),
+      '从7月2日开始，累计打卡2天'
+    );
+  });
+
+  it('renewCycle keeps prior days for the cumulative count', () => {
+    const done = base({
+      completions: ['2026-07-01', '2026-07-02', '2026-07-03'],
+    });
+    const next = engine.applyContinue(done, '2026-07-04');
+    next.completions = ['2026-07-05'];
+    assert.equal(engine.progressCount(next, '2026-07-05'), 1);
+    const summary = engine.summarizeByNote([next]);
+    assert.equal(summary.get('n1').totalDays, 4);
+    assert.equal(summary.get('n1').startDate, '2026-07-01');
+  });
+
+  it('same day across cycles counts once', () => {
+    const ended = base({
+      id: 'a',
+      status: 'ended',
+      completions: ['2026-07-01', '2026-07-02'],
+    });
+    const active = base({
+      id: 'b',
+      status: 'active',
+      archivedCompletions: ['2026-07-01', '2026-07-02'],
+      completions: ['2026-07-02', '2026-07-03'],
+    });
+    const summary = engine.summarizeByNote([ended, active]);
+    assert.equal(summary.get('n1').totalDays, 3);
+  });
+
+  it('cumulativeText is empty before the first check-in', () => {
+    const summary = engine.summarizeByNote([base()]);
+    assert.equal(summary.get('n1').totalDays, 0);
+    assert.equal(engine.cumulativeText(summary.get('n1')), '');
   });
 
   it('eligibleMakeupDays skips completed and today', () => {

@@ -75,7 +75,6 @@ Page({
     // checkin (照旧)
     active: [],
     ended: [],
-    checkinStats: { totalDays: 0 },
   },
 
   onShow() {
@@ -121,22 +120,25 @@ Page({
       });
 
     // checkin
-    const list = repo.listCheckins();
+    const list = repo.listCheckins().map((c) => {
+      const fixed = engine.restoreUnfinishedCycle(c);
+      const changed = fixed.completions.join('|') !== (c.completions || []).join('|')
+        || (fixed.archivedCompletions || []).join('|') !== (c.archivedCompletions || []).join('|')
+        || fixed.cycleStart !== c.cycleStart;
+      if (changed) repo.upsertCheckin(fixed);
+      return changed ? fixed : c;
+    });
     const activeCheckins = engine.partitionByStatus(list).active;
     const endedCheckins = engine.partitionByStatus(list).ended;
+    // 按 noteId 合并所有历史 completions(跨周期也算)
+    const summary = engine.summarizeByNote(list);
+
+    const buildSummaryText = (c) => engine.cumulativeText(c.noteId ? summary.get(c.noteId) : null);
+
     const decorate = (c) => {
       const done = engine.progressCount(c, today);
       const pct = Math.min(100, Math.round((done / Math.max(c.target, 1)) * 100));
       const completions = c.completions || [];
-      // 每个事项自己算连续(active 看当前连续;ended 看历史最长)
-      const isStreak = c.goalType === 'streak';
-      const cur = isStreak ? engine.currentStreak(c, today) : 0;
-      const longest = isStreak ? engine.longestStreak(c) : 0;
-      const streakText = !isStreak
-        ? ''
-        : (c.status === 'ended'
-          ? '曾连续 ' + longest + ' 天'
-          : (cur > 0 ? '连续 ' + cur + ' 天' : '今日还没打卡'));
       return {
         ...c,
         doneCount: done,
@@ -146,16 +148,8 @@ Page({
         pct,
         recent: completions.slice(-3).join('、'),
         recentLast: completions.length ? completions[completions.length - 1] : '',
-        showStreak: isStreak,
-        streakText,
+        summaryText: buildSummaryText(c),
       };
-    };
-
-    // 累计打卡天数(所有 checkin 的 completions 合并去重)—— 跨事项的总和
-    const allDays = new Set();
-    list.forEach((c) => (c.completions || []).forEach((d) => allDays.add(d)));
-    const checkinStats = {
-      totalDays: allDays.size,
     };
 
     this.setData({
@@ -166,7 +160,6 @@ Page({
       ideas,
       active: activeCheckins.map(decorate),
       ended: endedCheckins.map(decorate),
-      checkinStats,
     });
   },
 

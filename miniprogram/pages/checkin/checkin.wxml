@@ -16,7 +16,6 @@
       <view class="head-main">
         <view class="title-row">
           <text class="title">{{item.label}}</text>
-          <text class="streak-badge" wx:if="{{item.showStreak}}">{{item.streakText}}</text>
         </view>
         <view class="subline">
           <text>{{item.goalType === 'weekly' ? '周频次' : '连续打卡'}}</text>
@@ -31,6 +30,9 @@
       <view class="card-del" data-id="{{item.id}}" data-label="{{item.label}}" catchtap="onDelete">✕</view>
     </view>
 
+    <view class="summary-line" wx:if="{{item.summaryText}}">
+      <text class="summary-text">{{item.summaryText}}</text>
+    </view>
     <view class="progress-row">
       <text class="progress-num"><text class="num-strong">{{item.doneCount}}</text><text class="num-muted"> / {{item.target}}</text></text>
       <text class="progress-hint" wx:if="{{item.recent}}">最近 {{item.recentLast}}</text>
@@ -59,7 +61,6 @@
       <view class="head-main">
         <view class="title-row">
           <text class="title">{{item.label}}</text>
-          <text class="streak-badge ended" wx:if="{{item.showStreak}}">{{item.streakText}}</text>
         </view>
         <view class="subline">
           <text>上次 {{item.progressText}}</text>
@@ -72,6 +73,9 @@
         <text>已结束</text>
       </view>
       <view class="card-del" data-id="{{item.id}}" data-label="{{item.label}}" catchtap="onDelete">✕</view>
+    </view>
+    <view class="summary-line" wx:if="{{item.summaryText}}">
+      <text class="summary-text">{{item.summaryText}}</text>
     </view>
     <view class="actions" catchtap="noop">
       <button class="btn primary" size="mini" data-id="{{item.id}}" catchtap="onResume">继续打卡</button>

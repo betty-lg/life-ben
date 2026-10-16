@@ -14,27 +14,28 @@ Page({
   },
 
   refresh() {
-    const list = repo.listCheckins();
+    const list = repo.listCheckins().map((c) => {
+      const fixed = engine.restoreUnfinishedCycle(c);
+      const changed = fixed.completions.join('|') !== (c.completions || []).join('|')
+        || (fixed.archivedCompletions || []).join('|') !== (c.archivedCompletions || []).join('|')
+        || fixed.cycleStart !== c.cycleStart;
+      if (changed) repo.upsertCheckin(fixed);
+      return changed ? fixed : c;
+    });
     const { active, ended } = engine.partitionByStatus(list);
     const today = dayKey();
+    const summary = engine.summarizeByNote(list);
+    const buildSummaryText = (c) => engine.cumulativeText(c.noteId ? summary.get(c.noteId) : null);
     this.setData({
-      active: active.map((c) => this.decorate(c, today)),
-      ended: ended.map((c) => this.decorate(c, today)),
+      active: active.map((c) => this.decorate(c, today, buildSummaryText)),
+      ended: ended.map((c) => this.decorate(c, today, buildSummaryText)),
     });
   },
 
-  decorate(c, today) {
+  decorate(c, today, buildSummaryText) {
     const done = engine.progressCount(c, today);
     const pct = Math.min(100, Math.round((done / Math.max(c.target, 1)) * 100));
     const completions = c.completions || [];
-    const isStreak = c.goalType === 'streak';
-    const cur = isStreak ? engine.currentStreak(c, today) : 0;
-    const longest = isStreak ? engine.longestStreak(c) : 0;
-    const streakText = !isStreak
-      ? ''
-      : (c.status === 'ended'
-        ? '曾连续 ' + longest + ' 天'
-        : (cur > 0 ? '连续 ' + cur + ' 天' : '今日还没打卡'));
     return {
       ...c,
       doneCount: done,
@@ -44,8 +45,7 @@ Page({
       pct,
       recent: completions.slice(-3).join('、'),
       recentLast: completions.length ? completions[completions.length - 1] : '',
-      showStreak: isStreak,
-      streakText,
+      summaryText: buildSummaryText(c),
     };
   },
 
